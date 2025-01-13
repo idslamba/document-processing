@@ -6,6 +6,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 })
 export class HttpService {
 
+  private key = "9lmWqLpl9CH6f8vfhZaG2IoN7Be7GMZTDuj-P75umrh8AzFusnUS8Q==";
+
   constructor(private readonly http: HttpClient) { }
 
   public post(url: string, body: any, params: any) {
@@ -21,7 +23,7 @@ export class HttpService {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'x-functions-key': "9lmWqLpl9CH6f8vfhZaG2IoN7Be7GMZTDuj-P75umrh8AzFusnUS8Q=="
+        'x-functions-key': this.key
       })
     })
   }
@@ -35,7 +37,7 @@ export class HttpService {
       headers: new HttpHeaders({
         'Access-Control-Allow-Origin': '*',
         'enctype': 'multipart/form-data',
-        'x-functions-key': "9lmWqLpl9CH6f8vfhZaG2IoN7Be7GMZTDuj-P75umrh8AzFusnUS8Q=="
+        'x-functions-key': this.key
       }),
 
     })
@@ -71,7 +73,7 @@ export class HttpService {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'x-functions-key': "9lmWqLpl9CH6f8vfhZaG2IoN7Be7GMZTDuj-P75umrh8AzFusnUS8Q=="
+        'x-functions-key': this.key
 
       }),
 
