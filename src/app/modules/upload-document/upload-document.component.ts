@@ -13,9 +13,6 @@ import { SolventekConstants } from '../../shared/utils/constants';
 export class UploadDocumentComponent {
 
   constructor(private commonService: CommonService, private snackBar: SnackbarService) { 
-
-        this.snackBar.showSnackbar(['Only PDFs/Word Files less than 25 Mb can be uploaded'], 50000000, SolventekConstants.MESSAGE_TYPES.ERROR);
-
   }
 
   triggerFileInput() {
