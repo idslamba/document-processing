@@ -1,0 +1,56 @@
+<div class="dashboard-comtainer">
+    <div class="menu-container">
+        <div class="menu-logo-container">
+            <div class="menu">
+                <div class="menu-icon" (click)="openMenu()">
+                    <mat-icon>menu</mat-icon>
+                </div>
+            </div>
+            <div class="logo-container" routerLink="">
+                <img src="assets/logo.svg" class="logo" />
+            </div>
+            <div class="breadcrumb-container">
+
+                <ng-container *ngFor="let breadcrumb of breadcrumbs;let idx=index;let isLast=last">
+                    <a class="breadcrumb medium" [ngClass]="{'not-last':!isLast}" (click)="changeRoute(idx)">
+                        {{breadcrumb?.name}}
+                    </a>
+                    <ng-container *ngIf="!isLast">
+                        <span class="breadcrumb divider medium">></span>
+                    </ng-container>
+                </ng-container>
+
+            </div>
+        </div>
+        <div class="profile-container">
+            <!-- #tooltip="matTooltip" [matTooltip]="profile?.firstName + profile?.lastName" -->
+            <div class="profile pointer" #tooltip="matTooltip" matTooltip="Log out" (click)="logout()">
+                {{shortForm}}
+            </div>
+
+        </div>
+        <div class="progress-bar">
+            <app-progress-bar></app-progress-bar>
+        </div>
+    </div>
+    <div class="data-container">
+        <mat-sidenav-container class="side-nav-container">
+            <mat-sidenav #sidenav mode="over" class="sidenav">
+                <div class="menu-list">
+                    <div (click)="changeMenu(idx)" [routerLink]="menu?.routerLink" class="menu"
+                        [ngClass]="{'selected-menu': selectedMenu == menu.id}" *ngFor="let menu of menus;let idx=index">
+                        <div class="title">
+                            {{menu?.title}}</div>
+                    </div>
+                </div>
+            </mat-sidenav>
+
+            <mat-sidenav-content class="side-content">
+
+                <router-outlet />
+
+            </mat-sidenav-content>
+
+        </mat-sidenav-container>
+    </div>
+</div>

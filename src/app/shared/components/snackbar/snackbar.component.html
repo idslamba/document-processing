@@ -1,0 +1,5 @@
+<div class="snackbar-container" [ngClass]="{'error': type != SUCCESS}">
+    <div class="data-list" *ngFor="let message of messages">
+        {{message}}
+    </div>
+</div>

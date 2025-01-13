@@ -1,0 +1,56 @@
+<div class="parent-container">
+    <div class="heading-container medium">
+        <div class="heading medium">Dashboard</div>
+        <div class="filter">
+            <mat-form-field appearance="outline" class="example-form-field">
+                <mat-label>Select status range</mat-label>
+                <mat-date-range-input [formGroup]="dateRange" [rangePicker]="campaignOnePicker">
+                    <input matStartDate placeholder="Start date" formControlName="start">
+                    <input matEndDate placeholder="End date" formControlName="end">
+                </mat-date-range-input>
+                <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="campaignOnePicker"></mat-datepicker-toggle>
+                <mat-date-range-picker #campaignOnePicker></mat-date-range-picker>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="data-container">
+
+
+
+        <as-split direction="horizontal">
+            <as-split-area [size]="50" direction="horizontal">
+                <as-split direction="vertical">
+                    <as-split-area [size]="50">
+                        <div class="chart-container">
+                            <div id="chartdiv1" style="width: 100%; height: 100%"></div>
+                        </div>
+                    </as-split-area>
+                    <as-split-area [size]="50">
+                        <div class="chart-container">
+                            <div id="chartdiv2" style="width: 100%; height: 100%"></div>
+                        </div>
+                    </as-split-area>
+                </as-split>
+            </as-split-area>
+            <as-split-area>
+                <as-split direction="vertical">
+                    <as-split-area [size]="50">
+                        <div class="chart-container">
+                            <div id="chartdiv3" style="width: 100%; height: 100%"></div>
+                        </div>
+                    </as-split-area>
+                    <as-split-area [size]="50">
+                        <div class="chart-container">
+                            <div id="chartdiv4" style="width: 100%; height: 100%"></div>
+                        </div>
+                    </as-split-area>
+                </as-split>
+            </as-split-area>
+        </as-split>
+
+
+
+
+    </div>
+</div>

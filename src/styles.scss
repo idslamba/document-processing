@@ -1,0 +1,242 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$primary: mat.define-palette(mat.$indigo-palette);
+$accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$warn: mat.define-palette(mat.$red-palette);
+
+$theme: mat.define-light-theme((
+  color: (
+    primary: $primary,
+    accent: $accent,
+    warn: $warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+@include mat.all-component-themes($theme);
+
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+* {
+  font-size: 14px;
+  font-family: regular;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: regular;
+  src: url("assets/Fonts/Roboto-Regular.ttf");
+}
+
+@font-face {
+  font-family: medium;
+  src: url("assets/Fonts/Roboto-Medium.ttf");
+}
+
+@font-face {
+  font-family: bold;
+  src: url("assets/Fonts/Roboto-Bold.ttf");
+}
+
+@font-face {
+  font-family: semibold;
+  src: url("assets/Fonts/Roboto-Black.ttf");
+}
+
+
+* {
+  --primary-color: #001986;
+  --secondary-color: #C5FFCD;
+  --success-color: #00B2A0;
+  --error-color: #f44336;
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.outline-button {
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: black;
+  border: 1px solid var(--primary-color);
+}
+
+.icon {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
+.pointer{
+  cursor: pointer;
+}
+
+.center-text {
+  text-align: center;
+}
+
+
+.calendar-event{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  width: 100%;
+}
+
+.no-data {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-content: center;
+  font-family: medium;
+  grid-template-rows: unset !important;
+}
+
+.medium{
+  font-family: medium;
+}
+
+.bold{
+  font-family: bold;
+}
+
+.semi-bold{
+  font-family: semi-bold;
+}
+
+.custom-snackbar {
+  box-shadow: none;
+  background-color: white;
+}
+
+.ellipsis{
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.hidden{
+  overflow: hidden;
+}
+
+.disabled{
+  opacity: 0.57;
+  cursor: default;
+  pointer-events: none;
+}/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+///////////////////////////////
+
+.mat-mdc-dialog-surface {
+  border-radius: 24px;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px var(--primary-color);
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+.autocomplete-option {
+  max-height: 30px;
+  min-height: 36px !important;
+  font-size: 14px !important;
+}
+
+.mat-icon {
+  font-size: 16px;
+}
+
+.mat-mdc-snack-bar-container {
+  margin: 0 !important;
+}
+
+.mat-mdc-snack-bar-label {
+  padding: 0 !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: unset;
+  border-radius: 16px !important;
+  margin: 0;
+  padding: 0;
+}
+
+.mat-mdc-option{
+  font-size: 1rem;
+}
+
+.mat-mdc-form-field-infix{
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.mat-mdc-form-field-flex{
+  height: 40px;
+}
+
+.mdc-notched-outline__notch{
+  // display: grid;
+}
+
+.mat-mdc-floating-label{
+  top: 20px !important;
+}
+
+.mdc-floating-label--float-above{
+  top: 28px !important;
+}
+
+.mat-mdc-form-field{
+  width: 100%;
+}
+
+.mat-mdc-radio-button{
+  margin-right: 12px;
+}
+
+.mat-mdc-form-field-bottom-align{
+  display: none;
+}

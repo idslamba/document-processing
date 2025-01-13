@@ -1,0 +1,112 @@
+.parent-container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 60px 1fr;
+    gap: 0.5rem;
+    padding: 1rem;
+    .heading-container {
+        width: 100%;
+        line-height: 60px;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .data-container {
+        width: 100%;
+        display: grid;
+        overflow: hidden;
+        grid-template-rows: auto 1fr;
+        .details {
+            padding: 1rem;
+            background-color: #fff;
+            margin-bottom: 1rem;
+            .detail {
+                float: left;
+                margin-right: 1rem;
+                margin-bottom: 1rem;
+                &:last-child{
+                    margin-right: 0;
+                }
+                .title {
+                    color: var(--primary-color);
+                    float: left;
+                }
+
+                .data {
+                    float: left;
+                    margin-left: 1rem;
+                }
+            }
+        }
+
+        .extracted-data-container {
+            overflow: auto;
+            background-color: #fff;
+            padding: 1rem;
+            .heading-container-2 {
+                display: flex;
+                gap: 0.5rem;
+
+                .text {
+                    line-height: 36px;
+                }
+
+                .toggle {
+                    line-height: 36px;
+                    margin-left: 1rem;
+                }
+            }
+
+            .extracted-data {
+                overflow: auto;
+
+                .parsed-data-container {
+                    overflow: hidden;
+
+                    .parent {
+                        margin-bottom: 0.75rem;
+
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        .header {
+                            display: grid;
+                            grid-template-columns: auto 1fr;
+                            gap: 0.5rem;
+
+                            .icon {
+                                height: 1.5rem;
+                                width: 1.5rem;
+                                margin-top: 4px;
+                            }
+
+                            .key {
+                                font-size: 1.25rem;
+                                color: var(--primary-color);
+                            }
+                        }
+
+                        .rest-data {
+                            padding-left: 3rem;
+
+                            .key,
+                            .value {
+                                font-size: 1rem;
+                                margin-bottom: 0.5rem;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+
+
+    }
+}

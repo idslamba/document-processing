@@ -1,0 +1,16 @@
+.dialog-container{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    padding: 24px;
+    .message{
+        margin-bottom: 24px;
+    }
+    .buttons-container{
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+    }
+
+
+}

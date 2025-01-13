@@ -1,0 +1,82 @@
+<div class="parent-container">
+    <div class="heading-container medium">Submissions</div>
+    <div class="data-container">
+
+
+        <div class="document-container-parent">
+            <div class="mat-elevation-z2 list-container">
+                <div class="heading-container">
+                    <span class="heading-title">
+                        Document Name
+                        <span class="icon" *ngIf="sortingData[1]?.sort">
+                            <mat-icon *ngIf="sortingData[1]?.sort == 'desc'">arrow_downward</mat-icon>
+                            <mat-icon *ngIf="sortingData[1]?.sort == 'asc'">arrow_upward</mat-icon>
+                        </span>
+                    </span>
+
+                    <span class="heading-title center-text pointer" (click)="sortDoucment(1)">
+                        Date
+                    </span>
+                    <span class="heading-title center-text">
+                        Status
+                        <span class="icon" *ngIf="sortingData[2]?.sort">
+                            <mat-icon *ngIf="sortingData[2]?.sort == 'desc'">arrow_downward</mat-icon>
+                            <mat-icon *ngIf="sortingData[2]?.sort == 'asc'">arrow_upward</mat-icon>
+                        </span>
+                    </span>
+                    <span class="heading-title center-text">
+                        Actions
+                    </span>
+                </div>
+                <div class="workflow-container">
+                    <ng-container *ngIf="showSkeleton">
+                        <ngx-skeleton-loader count="15" appearance="line" />
+                    </ng-container>
+                    <ng-container *ngIf="!showSkeleton && dataSourceTable?.length">
+                        <div class="project" [ngClass]="{'even':(idx %2 == 0),'odd':(idx %2 != 0)}"
+                            *ngFor="let document of dataSourceTable;index as idx">
+                            <span class="list-object ellipsis"
+                                [ngClass]="{'disabled':document?.documentStatus == 'completed'}">
+                                {{document?.name}}
+                            </span>
+                            <span class="list-object center-text">
+                                {{ document?.createdDate | date:'dd/MM/yyyy' }}
+                            </span>
+                            <span class="list-object center-text"
+                                [ngClass]="{'disabled':document?.documentStatus == 'completed'}">
+                                {{document?.status}}
+                                <!-- <ng-container *ngIf="!document?.documentStatus || document?.documentStatus == 'active'">
+                                    Pending
+                                </ng-container>
+                                <ng-container *ngIf="document?.documentStatus == 'progress'">
+                                    In progress
+                                </ng-container>
+                                <ng-container *ngIf="document?.documentStatus == 'completed'">
+                                    Completed
+                                </ng-container> -->
+                            </span>
+                            <span class="list-object center-text parent-object">
+                               <span class="option pointer center-text medium" [routerLink]="['/view-submissions/details', document?.id]">View Details</span>
+                               <span class="option pointer center-text medium" (click)="selectDocument(idx)" [routerLink]="['/view-submissions', document?.id]">Start QC</span>
+                            </span>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="!showSkeleton && !dataSourceTable?.length">
+                        <div class="no-data">
+                            No Documents present
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="pagination-container" *ngIf="!showSkeleton">
+                    <mat-paginator #paginator (page)="handlePageEvent($event)" [length]="length"
+                        [pageSize]="pageSize" [showFirstLastButtons]="true"
+                        [pageSizeOptions]="pageSizeOptions"
+                        [pageIndex]="pageIndex" aria-label="Select page">
+                    </mat-paginator>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>

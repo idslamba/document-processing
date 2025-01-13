@@ -1,0 +1,115 @@
+<div class="selected-document-container">
+
+    <div class="top medium ellipsis">
+        <div class="back-icon pointer">
+            <mat-icon class="icon" #tooltip="matTooltip" matTooltip="Go to View Submissions"
+                [routerLink]="['/view-submissions']">arrow_back</mat-icon>
+        </div>
+
+        <div class="zoom-buttons">
+            <div class="text medium">{{scale}}x</div>
+            <div class="option pointer medium" (click)="zoom(-1)">-</div>
+            <div class="option pointer medium" (click)="zoom(1)">+</div>
+        </div>
+
+    </div>
+    <div class="bottom">
+        <as-split direction="horizontal">
+            <as-split-area [size]="40">
+                <div class="left-side">
+                    <div class="heading">
+                        <div class="name ellipsis medium">
+                            {{selectedDocument?.name}}
+                        </div>
+                        <div class="buttons">
+                            <div (click)="filterConfidence('low')" class="button cursor low pointer"
+                                #tooltip="matTooltip" matTooltip="Confidence level less than 90%"
+                                [ngClass]="{'selected': selectedConfidenceType == 'low'}"></div>
+                            <div (click)="filterConfidence('medium')" class="button medium2 pointer"
+                                #tooltip="matTooltip" matTooltip="Confidence level greater than 90% and less than 95%"
+                                [ngClass]="{'selected': selectedConfidenceType == 'medium'}"></div>
+                            <div (click)="filterConfidence('high')" class="button high pointer" #tooltip="matTooltip"
+                                matTooltip="Confidence level greater than 95%"
+                                [ngClass]="{'selected': selectedConfidenceType == 'high'}"></div>
+                        </div>
+                    </div>
+                    <div class="field-container" *ngIf="displayFields?.length && !showSkeleton">
+                        <div class="field" *ngFor="let field of displayFields;let idx=index">
+                            <div class="field-top">
+                                <div class="name ellipsis pointer" #tooltip="matTooltip" [matTooltip]="field.name"
+                                    (click)="highlightField(idx)">
+                                    {{field.name}}
+                                </div>
+                                <div class="reset pointer">
+                                    <ng-container *ngIf="isFieldChanged[field.name]">
+                                        <mat-icon #tooltip="matTooltip" matTooltip="Reset Content" class="reset-icon"
+                                            (click)="restoreFieldData(field.name)">restart_alt</mat-icon>
+                                    </ng-container>
+                                </div>
+                                <div class="input ellipsis" #tooltip="matTooltip" [matTooltip]="field.content">
+                                    {{field.content}}
+                                </div>
+
+                                <div #tooltip="matTooltip" [matTooltip]="field.confidence + ' %'"
+                                    class="confidence-container"
+                                    [ngClass]="{'high': (field.confidence > 95), 'medium2': (field.confidence > 95 && field.confidence < 90), 'low': (field.confidence < 90)}">
+
+                                </div>
+                                <div class="edit-icon pointer">
+                                    <mat-icon #tooltip="matTooltip" matTooltip="Edit Content" class="reset-icon"
+                                        (click)="editField(field.name)">edit</mat-icon>
+                                </div>
+                            </div>
+                            <div class="field-bottom" *ngIf="field?.updatedContent?.length || editSet.has(field.name)">
+                                <input (keydown)="confidenceChanged(field.name)" type="text"
+                                    [(ngModel)]="field.updatedContent" class="input-field"
+                                    [disabled]="!editSet.has(field.name)">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="no-fields-available" *ngIf="!displayFields?.length && !showSkeleton">
+                        <ng-container *ngIf="selectedConfidenceType?.length">
+                            No fields are available for the selected confidence level
+                        </ng-container>
+                        <ng-container *ngIf="!selectedConfidenceType?.length">
+                            No fields are available for the selected document
+                        </ng-container>
+                    </div>
+                    <div class="skeleton" *ngIf="showSkeleton">
+                        <ngx-skeleton-loader count="150" appearance="line" />
+                    </div>
+                    <div class="update-button">
+                        <button class="primary-button" (click)="submitContent()">Submit</button>
+                        <button class="outline-button" *ngIf="showUpdateButton" (click)="saveContent()">Save</button>
+                    </div>
+                </div>
+            </as-split-area>
+            <as-split-area>
+                <div class="middle" #pdfContainer>
+                    <div class="skeleton" *ngIf="pdfLoading">
+                        <ngx-skeleton-loader count="150" appearance="line" />
+                    </div>
+                    <div class="canvas-container" id="canvas-container" #canvasContainer>
+                        <canvas #canvas id="canvas"></canvas>
+                    </div>
+                </div>
+            </as-split-area>
+        </as-split>
+
+
+
+
+
+    </div>
+    <div class="buttons-container">
+        <div class="buttons">
+            <div class="page pointer" [ngClass]="{'selected-page': page == seletedPage}" (click)="pageSeleted(page)"
+                *ngFor="let page of totalPages;let idx=index">
+                {{page}}
+            </div>
+        </div>
+    </div>
+
+
+</div>

@@ -1,0 +1,20 @@
+<div class="dialog-container">
+    <div class="message">
+      {{data?.message}}
+    </div>
+    <div class="buttons-container" *ngIf="!data?.buttons?.length">
+      <button mat-dialog-close mat-raised-button>Cancel</button>
+      <button [mat-dialog-close]="true" cdkFocusInitial class="primary-button">Yes</button>
+    </div>
+    <div class="buttons-container" *ngIf="data?.buttons?.length">
+      <ng-container *ngFor="let button of data.buttons">
+        <ng-container *ngIf="button.type == 2">
+          <button [mat-dialog-close]="true" (click)="customButtonClicked(button)" cdkFocusInitial
+            class="primary-button">{{button?.label}}</button>
+        </ng-container>
+        <ng-container *ngIf="button.type == 1">
+          <button mat-dialog-close mat-raised-button>{{button?.label}}</button>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>

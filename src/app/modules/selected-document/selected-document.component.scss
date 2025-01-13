@@ -1,0 +1,257 @@
+.selected-document-container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 50px 1fr 50px;
+    padding: 12px;
+
+    .top {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        padding-top: 8px;
+        position: relative;
+        padding-right: 90px;
+        padding-left: 30px;
+
+        .back-icon {
+            position: absolute;
+            left: 0;
+            top: 8px;
+
+            .icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        .zoom-buttons {
+            position: absolute;
+            right: 4px;
+            top: 2px;
+
+            .text {
+                font-size: 1rem;
+                color: var(--primary-color);
+                margin-right: 8px;
+                float: left;
+                margin-top: 5px;
+            }
+
+            .option {
+                height: 30px;
+                width: 30px;
+                background-color: var(--primary-color);
+                color: white;
+                display: grid;
+                place-content: center;
+                float: left;
+                font-size: 1.5rem;
+                border-right: 2px solid white;
+
+                &:last-child {
+                    border-right: none;
+                }
+            }
+        }
+    }
+
+    .bottom {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+
+        .left-side {
+            display: grid;
+            grid-template-rows: 45px 1fr auto;
+            overflow: hidden;
+            height: 100%;
+            .heading {
+                background-color: #CBDEF0;
+                padding-left: 12px;
+                line-height: 45px;
+                font-size: 1.2rem;
+                color: var(--primary-color);
+                display: grid;
+                gap: 12px;
+                grid-template-columns: 1fr 66px;
+                padding-right: 8px;
+
+                .name {}
+
+                .buttons {
+                    display: grid;
+                    gap: 8px;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    padding-top: 14px;
+
+                    .button {
+                        height: 18px;
+                        border-radius: 6px;
+                    }
+
+                    .selected {
+                        box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+                        border: 2px solid var(--primary-color);
+                    }
+                }
+            }
+
+            .field-container {
+                overflow: auto;
+                padding: 12px;
+                background-color: #EBF0F5;
+
+                .field {
+                    margin-bottom: 12px;
+                    display: grid;
+                    grid-template-rows: auto auto;
+
+                    .field-top {
+                        display: grid;
+                        grid-template-columns: 1fr 18px 150px 12px 18px;
+                        gap: 12px;
+
+                        .name {
+                            text-decoration: underline;
+                            color: var(--primary-color);
+                        }
+
+                        .input {
+                            background-color: #BFC1CD;
+                            color: #F1F1F1;
+                            height: 24px;
+                            padding: 2px 6px 0 6px;
+                            border: 1px solid #BFC1CD;
+                            border-radius: 5px;
+                        }
+
+                        .reset {
+                            max-height: 18px;
+
+                            .reset-icon {
+                                color: black;
+                                font-size: 1.4rem;
+                                margin-top: 2px;
+                            }
+                        }
+
+                        .edit-icon {
+                            padding-top: 2px;
+                            max-height: 24px;
+                        }
+
+                        .confidence-container {
+                            height: 12px;
+                            border-radius: 50%;
+                            margin-top: 6px;
+                        }
+                    }
+
+                    .field-bottom {
+                        margin-top: 8px;
+                        .input-field {
+                            width: 100%;
+                            border-radius: 5px;
+                        }
+                    }
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+
+
+                }
+            }
+
+            .no-fields-available {
+                overflow: auto;
+                padding: 12px;
+                background-color: #EBF0F5;
+                display: grid;
+                place-content: center;
+            }
+
+            .update-button {
+                background-color: #EBF0F5;
+                padding-bottom: 8px;
+
+                button {
+                    float: right;
+                    margin-right: 12px;
+                }
+            }
+        }
+
+
+        .middle {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            background-color: #BFC1CD;
+
+            .skeleton {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            .canvas-container {
+                overflow: auto;
+                max-width: 100%;
+                max-height: 100%;
+                width: fit-content;
+                margin: auto;
+            }
+        }
+    }
+
+    .buttons-container {
+        margin-top: 10px;
+        height: 40px;
+        display: grid;
+        place-content: center;
+        margin-left: 350px;
+
+        .buttons {
+            overflow: hidden;
+
+            .page {
+                float: left;
+                height: 30px;
+                width: 30px;
+                display: grid;
+                place-content: center;
+                border: 2px solid var(--primary-color);
+                color: var(--primary-color);
+            }
+
+            .selected-page {
+                background-color: var(--primary-color);
+                color: white;
+            }
+        }
+
+    }
+
+
+}
+
+.confidence-field {
+    max-width: 100%;
+}
+
+.high {
+    background-color: #32CA00;
+}
+
+.medium2 {
+    background-color: #FFC300;
+}
+
+.low {
+    background-color: #FF0600;
+}

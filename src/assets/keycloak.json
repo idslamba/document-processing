@@ -1,0 +1,8 @@
+{
+  "realm": "solventek",
+  "auth-server-url": "https://52.172.39.120/",
+  "ssl-required": "external",
+  "resource": "solventekrpa",
+  "public-client": true,
+  "confidential-port": 0
+}

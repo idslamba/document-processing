@@ -1,0 +1,36 @@
+.parent-container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 60px 1fr;
+    gap: 0.5rem;
+
+    .heading-container {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        .heading{
+            line-height: 60px;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .filter{
+
+        }
+    }
+
+    .data-container {
+        width: 100%;
+        overflow: hidden;
+
+        .chart-container {
+            width: 100%;
+            overflow: auto;
+            height: 100%;
+            padding: 1rem;
+        }
+    }
+}

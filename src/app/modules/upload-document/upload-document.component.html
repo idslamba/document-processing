@@ -1,0 +1,27 @@
+<div class="parent-container">
+    <div class="heading-container medium">Upload Document</div>
+    <div class="data-container">
+
+        <!-- <div class="upload-section">
+            <input type="file" id="fileInput" style="display: none;" />
+            <div class="drag-drop-area" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                Drag and drop a file here or
+                <button onclick="document.getElementById('fileInput').click();">Upload</button>
+            </div>
+        </div> -->
+
+
+        <div class="upload-button-container" (drop)="handleDrop($event)" (dragover)="handleDragOver($event)">
+            <input type="file" id="fileInput" accept=".pdf,image/*" style="display:none"
+                (change)="onFileSelected($event)">
+            <div class="text">
+                Drag & drop files here
+            </div>
+            <div class="upload-button">
+                <button (click)="triggerFileInput()" class="primary-button">Browse</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>

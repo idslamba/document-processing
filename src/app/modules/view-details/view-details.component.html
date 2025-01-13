@@ -1,0 +1,118 @@
+<div class="parent-container">
+    <div class="heading-container medium">Submission Details</div>
+    <div class="data-container">
+
+        <div class="details">
+            <div class="detail">
+                <div class="title medium">Document Name &nbsp;:</div>
+                <div class="data">{{selectedDocument?.name}}</div>
+            </div>
+            <div class="detail" *ngIf="selectedDocument?.result?.umr?.value?.length">
+                <div class="title medium">UMR &nbsp;:</div>
+                <div class="data">{{selectedDocument?.result?.umr?.value}}</div>
+            </div>
+            <div class="detail">
+                <div class="title medium">Broker &nbsp;:</div>
+                <div class="data">{{selectedDocument?.name}}</div>
+            </div>
+            <div class="detail">
+                <div class="title medium">Date &nbsp;:</div>
+                <div class="data">{{selectedDocument?.createdDate | date : 'dd/MM/yyyy'}}</div>
+            </div>
+            <div class="detail">
+                <div class="title medium">Received Date &nbsp;:</div>
+                <div class="data">{{selectedDocument?.lastUpdatedDate | date : 'dd/MM/yyyy'}}</div>
+            </div>
+            <div class="detail">
+                <div class="title medium">Sender Name &nbsp;:</div>
+                <div class="data">{{selectedDocument?.Name}}</div>
+            </div>
+        </div>
+
+        <div class="extracted-data-container">
+            <div class="heading-container-2">
+                <div class="text medium">View Extracted Data</div>
+                <div class="toggle">
+                    <mat-slide-toggle class="example-margin" color="primary" [checked]="currentExtraction == 'json'"
+                        (toggleChange)="extractionChanged()">
+                        <ng-container *ngIf="currentExtraction == 'json'">Show JSON</ng-container>
+                        <ng-container *ngIf="currentExtraction == 'csv'">Show CSV</ng-container>
+                    </mat-slide-toggle>
+                </div>
+            </div>
+            <div class="extracted-data">
+                <ng-container *ngIf="currentExtraction == 'json'">
+
+                    <div class="parsed-data-container">
+
+                        <div class="parent" *ngFor="let data of parsedData;let idx=index">
+
+                            <div class="header">
+                                <div class="icon">
+                                    <mat-icon (click)="expandedParsedData.delete(idx+'')"
+                                        *ngIf="expandedParsedData.has(idx+'')">keyboard_arrow_down</mat-icon>
+                                    <mat-icon (click)="expandedParsedData.add(idx+'')"
+                                        *ngIf="!expandedParsedData.has(idx+'')">keyboard_arrow_right</mat-icon>
+                                </div>
+                                <div class="key medium">{{data.key}}</div>
+                            </div>
+                            <div class="rest-data">
+                                <div class="expanded-value-direct"
+                                    *ngIf="!data.children?.length && expandedParsedData.has(idx+'')">
+                                    <div class="header">
+                                        <div class="key">value</div>
+                                        <div class="value">{{data.value}}</div>
+                                    </div>
+                                    <div class="header">
+                                        <div class="key">confidence</div>
+                                        <div class="value">{{+data.confidence * 100}} %</div>
+                                    </div>
+                                </div>
+
+                                <div class="expanded-value-direct"
+                                    *ngIf="data.children?.length && expandedParsedData.has(idx+'')">
+
+                                    <ng-container *ngFor="let child of data.children;let idx2=index">
+                                        <div class="header">
+                                            <div class="icon">
+                                                <mat-icon (click)="expandedParsedData.delete(idx+'-'+idx2)"
+                                                    *ngIf="expandedParsedData.has(idx+'-'+idx2)">keyboard_arrow_down</mat-icon>
+                                                <mat-icon (click)="expandedParsedData.add(idx+'-'+idx2)"
+                                                    *ngIf="!expandedParsedData.has(idx+'-'+idx2)">keyboard_arrow_right</mat-icon>
+                                            </div>
+                                            <div class="key medium">{{child.key}}</div>
+                                        </div>
+                                        <div class="rest-data" *ngIf="expandedParsedData.has(idx+'-'+idx2)">
+                                            <div class="expanded-value-direct">
+                                                <div class="header">
+                                                    <div class="key">value</div>
+                                                    <div class="value">{{child.value}}</div>
+                                                </div>
+                                                <div class="header">
+                                                    <div class="key">confidence</div>
+                                                    <div class="value">{{+child.confidence * 100}} %</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                </ng-container>
+                <ng-container *ngIf="currentExtraction == 'csv'">
+
+                </ng-container>
+            </div>
+        </div>
+
+    </div>
+</div>
