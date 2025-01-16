@@ -11,12 +11,13 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { CommonService } from '../../shared/services/common.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { QualityServiceService } from '../../shared/services/quality-service.service';
+import { time } from '@amcharts/amcharts5';
 
 
 @Component({
   selector: 'app-view-submissions',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, MatIconModule, MatInputModule,MatPaginator ,MatPaginatorModule, CommonModule, RouterLink, RouterLinkActive, RouterOutlet, NgxSkeletonLoaderModule
+  imports: [FormsModule, ReactiveFormsModule, MatIconModule, MatInputModule, MatPaginator, MatPaginatorModule, CommonModule, RouterLink, RouterLinkActive, RouterOutlet, NgxSkeletonLoaderModule
     , MatTooltipModule],
   templateUrl: './view-submissions.component.html',
   styleUrl: './view-submissions.component.scss'
@@ -40,21 +41,31 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
   noFilteredData: boolean = false;
   dataSourceTable: Array<any> = [];
   sortingData: any = { 1: { sort: '' }, 2: { sort: '' } };
+  timeLeft!: number;
+  timeInterval!: any;
 
-  constructor(private snackbarService: SnackbarService, private commonService: CommonService,private qualityService: QualityServiceService) { }
+  constructor(private snackbarService: SnackbarService, private commonService: CommonService, private qualityService: QualityServiceService) { }
 
   ngOnInit(): void {
     this.getProjects();
   }
 
   getProjects() {
+    this.showSkeleton = true;
     this.commonService.getDocumentsList().subscribe({
       next: (res: any) => {
         if (res?.length) {
           this.dataSource = res.filter((ele: any) => ele.active);
           this.length = this.dataSource.length;
           this.dataSourceTable = this.dataSource.slice(this.pageSize * this.pageIndex, this.pageSize * (this.pageIndex + 1))
-
+          this.timeLeft = 30;
+          this.timeInterval = setInterval(() => {
+            this.timeLeft--;
+            if (this.timeLeft == 0) {
+              clearInterval(this.timeInterval);
+              this.getProjects();
+            }
+          }, 1000)
         }
         this.showSkeleton = false;
       },
@@ -63,10 +74,6 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-
-
-
 
   handlePageEvent(e: PageEvent) {
     this.pageEvent = e;
@@ -142,6 +149,11 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
 
   selectDocument(index: number) {
     this.qualityService.selectedDocument = this.dataSourceTable[index];
+  }
+
+  refresh() {
+    clearInterval(this.timeInterval);
+    this.getProjects();
   }
 
   ngOnDestroy(): void {

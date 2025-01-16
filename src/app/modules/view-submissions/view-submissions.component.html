@@ -1,5 +1,16 @@
 <div class="parent-container">
-    <div class="heading-container medium">Submissions</div>
+    <div class="heading-container medium">
+        <div class="title">Submissions</div>
+        <div class="refresh-button">
+            <ng-container *ngIf="!showSkeleton">
+
+                <div class="text">
+                    Auto refreshing in {{ timeLeft }} seconds
+                </div>
+                <button class="primary-button" (click)="refresh()">Refresh Documents</button>
+            </ng-container>
+        </div>
+    </div>
     <div class="data-container">
 
 

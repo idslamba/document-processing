@@ -102,10 +102,10 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   }
 
   async getPDFCode() {
-    this.http.post("https://rpa-services.azurewebsites.net/api/Download?code=qshH5kaD0AVolQZvaObh9upJln8s1prFbpKb_ScAEGWRAzFuWUTsyA%3D%3D",
-      { documentUrl: this.selectedDocument.documentUrl }, {
-      responseType: 'arraybuffer',
-    }).subscribe((response: any) => {
+
+    // https://solventek-document-ai.azurewebsites.net/api/download/5eb51b8c-93e3-42b0-94d9-7e7a1536135f
+
+    this.qualityReviewService.downloadCode(this.selectedDocument.id).subscribe((response: any) => {
       pdfjsLib.getDocument(response).promise.then(async (pdf: any) => {
         this.pdf = pdf;
         this.totalPages = [];

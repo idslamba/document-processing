@@ -33,7 +33,7 @@
             .text {
                 position: absolute;
                 top: 50%;
-                left: 50%;
+                left: calc(50% - 36px);
                 font-size: 1rem;
                 opacity: 0.5;
             }

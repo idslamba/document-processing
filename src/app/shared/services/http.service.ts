@@ -74,9 +74,7 @@ export class HttpService {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'x-functions-key': this.key
-
       }),
-
     })
   }
 
