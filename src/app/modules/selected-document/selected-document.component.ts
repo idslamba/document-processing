@@ -35,7 +35,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   pdf: any;
   // contentData: Array<string> = [];
   // contentDataUpdated: Array<string> = [];
-  selectedDocumentData: any;
   isFieldChanged: any = {};
   showUpdateButton: boolean = false;
   totalPages: Array<number> = [];
@@ -71,12 +70,47 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         this.displayFields = [];
         this.totalPages = [];
         this.pagesDimensions = [];
-        this.selectedDocumentData = data[0];
-        console.log(JSON.parse(this.selectedDocumentData.result));
-        if (this.selectedDocumentData?.results?.pages?.length) {
-          for (let i = 0; i < this.selectedDocumentData.results.pages.length; i++) {
+        this.selectedDocument = data[0];
+
+
+        // const parsedData =this.selectedDocument.result;
+        // Object.keys(parsedData).forEach((key: string) => {
+        //   if (parsedData[key]['value']?.length && parsedData[key]['confidence'] >= 0) {
+        //     this.parsedData.push({
+        //       key: key,
+        //       confidence: parsedData[key]['confidence'],
+        //       value: parsedData[key]['value']
+        //     });
+        //   } else if (Object.keys(parsedData[key]).length) {
+        //     const children: any = [];
+        //     Object.keys(parsedData[key]).forEach((childKey: string) => {
+        //       if (parsedData[key][childKey] && parsedData[key][childKey]['value']?.length && parsedData[key][childKey]['confidence'] >= 0) {
+        //         children.push({
+        //           key: childKey,
+        //           confidence: parsedData[key][childKey]['confidence'],
+        //           value: parsedData[key][childKey]['value']
+        //         });
+        //       }
+
+        //     });
+        //     this.parsedData.push({
+        //       key: key,
+        //       confidence: 100,
+        //       value: "",
+        //       children: children
+        //     });
+
+        //   }
+
+        // })
+
+
+
+        console.log(JSON.parse(this.selectedDocument.result));
+        if (this.selectedDocument?.results?.pages?.length) {
+          for (let i = 0; i < this.selectedDocument.results.pages.length; i++) {
             // this.totalPages.push(i + 1);
-            this.pagesDimensions.push({ index: i + 1, unit: this.selectedDocumentData.results.pages[i].unit, dimension: { height: this.selectedDocumentData.results.pages[i].height, width: this.selectedDocumentData.results.pages[i].width } })
+            this.pagesDimensions.push({ index: i + 1, unit: this.selectedDocument.results.pages[i].unit, dimension: { height: this.selectedDocument.results.pages[i].height, width: this.selectedDocument.results.pages[i].width } })
           }
         }
         Object.keys(data[0].results.documents[0].fields).forEach(ele => {
@@ -320,7 +354,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     //   this.selectedDocument.assignee = this.profile?.username;
     //   this.selectedDocument.lastUpdatedDate = new Date().toISOString();
     //   this.selectedDocument.documentStatus = "progress";
-    //   this.selectedDocumentData.completedBy = this.profile?.username;
+    //   this.selectedDocument.completedBy = this.profile?.username;
     //   this.qualityReviewService.updateAssigneeInDocument(this.selectedDocumentId, this.selectedDocument).subscribe((data: any) => {
     //     if (data.id) {
     //       //API is succesfull
@@ -337,10 +371,10 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     // })
 
     // this.fields.forEach(ele => {
-    //   this.selectedDocumentData.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
+    //   this.selectedDocument.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
     // })
-    // this.selectedDocumentData.lastUpdatedDate = new Date().toISOString();
-    // this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocumentData).subscribe((data: any) => {
+    // this.selectedDocument.lastUpdatedDate = new Date().toISOString();
+    // this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocument).subscribe((data: any) => {
     //   if (data.id) {
     //     this.isFieldChanged = {};
     //     this.editSet = new Set();
@@ -364,7 +398,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     //       this.selectedDocument.assignee = this.profile?.username;
     //       this.selectedDocument.lastUpdatedDate = new Date().toISOString();
     //       this.selectedDocument.documentStatus = "completed";
-    //       this.selectedDocumentData.completedBy = this.profile?.username;
+    //       this.selectedDocument.completedBy = this.profile?.username;
     //       this.qualityReviewService.updateAssigneeInDocument(this.selectedDocumentId, this.selectedDocument).subscribe(data => {
 
     //       })
@@ -377,11 +411,11 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     //     })
 
     //     this.fields.forEach(ele => {
-    //       this.selectedDocumentData.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
+    //       this.selectedDocument.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
     //     })
-    //     this.selectedDocumentData.lastUpdatedDate = new Date().toISOString();
-    //     this.selectedDocumentData.documentStatus = "completed";
-    //     this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocumentData).subscribe(data => {
+    //     this.selectedDocument.lastUpdatedDate = new Date().toISOString();
+    //     this.selectedDocument.documentStatus = "completed";
+    //     this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocument).subscribe(data => {
     //       if (data) {
     //         this.isFieldChanged = {};
     //         this.editSet = new Set();

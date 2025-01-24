@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,7 @@ import { CommonService } from '../../shared/services/common.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { QualityServiceService } from '../../shared/services/quality-service.service';
 import { time } from '@amcharts/amcharts5';
+import { SolventekConstants } from '../../shared/utils/constants';
 
 
 @Component({
@@ -43,36 +44,93 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
   sortingData: any = { 1: { sort: '' }, 2: { sort: '' } };
   timeLeft!: number;
   timeInterval!: any;
-
+  documentListBackup: Array<any> = [];
+  inactivityTimeout: any;
   constructor(private snackbarService: SnackbarService, private commonService: CommonService, private qualityService: QualityServiceService) { }
+
+  @HostListener('window:mousemove')
+  @HostListener('window:keydown')
+  resetInactivityTimer() {
+    clearTimeout(this.inactivityTimeout);
+    this.inactivityTimeout = setTimeout(() => {
+      this.startCountdown();
+    }, 60000); // 60 seconds
+  }
+
+  // addInactivityListeners() {
+  //   window.addEventListener('mousemove', this.resetInactivityTimer.bind(this));
+  //   window.addEventListener('keydown', this.resetInactivityTimer.bind(this));
+  // }
+
+  // removeInactivityListeners() {
+  //   window.removeEventListener('mousemove', this.resetInactivityTimer.bind(this));
+  //   window.removeEventListener('keydown', this.resetInactivityTimer.bind(this));
+  // }
+
+  startCountdown() {
+    this.timeLeft = 60;
+    this.timeInterval = setInterval(() => {
+      this.timeLeft--;
+      if (this.timeLeft == 0) {
+        clearInterval(this.timeInterval);
+        this.getProjects();
+      }else if(this.timeLeft == 5){
+        this.snackbarService.showSnackbar(['Documents will be auto refreshed after 5 seconds'], SolventekConstants.DURATION);
+      }
+    }, 1000);
+  }
+
 
   ngOnInit(): void {
     this.getProjects();
+    // this.resetInactivityTimer();
+    // this.addInactivityListeners();
   }
 
   getProjects() {
     this.showSkeleton = true;
     this.commonService.getDocumentsList().subscribe({
       next: (res: any) => {
-        if (res?.length) {
-          this.dataSource = res.filter((ele: any) => ele.active);
-          this.length = this.dataSource.length;
-          this.dataSourceTable = this.dataSource.slice(this.pageSize * this.pageIndex, this.pageSize * (this.pageIndex + 1))
-          this.timeLeft = 30;
+        this.showSkeleton = false;
+        this.dataSource = [];
+        this.documentListBackup = JSON.parse(JSON.stringify(res));
+        this.clearSearch();
+          if (res?.length) {
+            res = res.sort((a:any, b:any) => new Date(a?.createdDate).getTime() > new Date(b?.createdDate).getTime() ? -1 : 1);
+            this.sortingData[2]['sort'] = 'desc';
+            this.dataSource = res
+            this.documentListBackup = JSON.parse(JSON.stringify(res));
+            this.length = this.dataSource.length;
+            this.dataSourceTable = this.dataSource.slice(this.pageSize * this.pageIndex, this.pageSize * (this.pageIndex + 1))
+          }
+          this.timeLeft = 60;
           this.timeInterval = setInterval(() => {
             this.timeLeft--;
             if (this.timeLeft == 0) {
               clearInterval(this.timeInterval);
               this.getProjects();
             }
+            else if(this.timeLeft == 7){
+              this.snackbarService.showSnackbar(['Documents will be auto refreshed after 5 seconds'], 5000, SolventekConstants.MESSAGE_TYPES.ERROR);
+            }
           }, 1000)
-        }
         this.showSkeleton = false;
       },
       error: (err) => {
         console.log(err);
       }
     });
+  }
+
+  clearSearch() {
+    this.dataSource = JSON.parse(JSON.stringify(this.documentListBackup));
+    this.noFilteredData = false;
+    this.pageSize = 10;
+    this.pageIndex = 0;
+    this.length = this.dataSource.length;
+    this.sortingData = { 1: { sort: '' }, 2: { sort: '' } };
+    this.search.setValue('');
+    this.handlePageEvent({ length: this.length, pageIndex: this.pageIndex, pageSize: this.pageSize });
   }
 
   handlePageEvent(e: PageEvent) {
@@ -99,42 +157,42 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
 
   sortDoucment(fieldType: number) {
 
-    // if (this.sortingData[fieldType]?.sort == 'asc') {
-    //   this.sortingData[fieldType]['sort'] = 'desc';
-    // } else {
-    //   this.sortingData[fieldType]['sort'] = 'asc';
-    // }
+    if (this.sortingData[fieldType]?.sort == 'asc') {
+      this.sortingData[fieldType]['sort'] = 'desc';
+    } else {
+      this.sortingData[fieldType]['sort'] = 'asc';
+    }
 
-    // switch (fieldType) {
-    //   case 1: {
-    //     if (this.sortingData[fieldType].sort == 'asc') {
-    //       this.dataSource = this.dataSource.sort((a, b) => {
-    //         return a.name > b.name ? 1 : -1;
-    //       })
-    //     }
-    //     if (this.sortingData[fieldType].sort == 'desc') {
-    //       this.dataSource = this.dataSource.sort((a, b) => {
-    //         return a.name > b.name ? -1 : -1;
-    //       })
-    //     }
-    //     this.sortingData[2].sort = "";
-    //     break;
-    //   }
-    //   case 2: {
-    //     if (this.sortingData[fieldType].sort == 'asc') {
-    //       this.dataSource = this.dataSource.sort((a, b) => {
-    //         return new Date(a.createdDate).getTime() > new Date(b.createdDate).getTime() ? 1 : -1;
-    //       })
-    //     }
-    //     if (this.sortingData[fieldType].sort == 'desc') {
-    //       this.dataSource = this.dataSource.sort((a, b) => {
-    //         return new Date(a.createdDate).getTime() > new Date(b.createdDate).getTime() ? -1 : -1;
-    //       })
-    //     }
-    //     this.sortingData[1].sort = "";
-    //     break;
-    //   }
-    // }
+    switch (fieldType) {
+      case 1: {
+        if (this.sortingData[fieldType].sort == 'asc') {
+          this.dataSource = this.dataSource.sort((a, b) => {
+            return a.name > b.name ? 1 : -1;
+          })
+        }
+        if (this.sortingData[fieldType].sort == 'desc') {
+          this.dataSource = this.dataSource.sort((a, b) => {
+            return a.name > b.name ? -1 : -1;
+          })
+        }
+        this.sortingData[2].sort = "";
+        break;
+      }
+      case 2: {
+        if (this.sortingData[fieldType].sort == 'asc') {
+          this.dataSource = this.dataSource.sort((a, b) => {
+            return new Date(a.createdDate).getTime() > new Date(b.createdDate).getTime() ? 1 : -1;
+          })
+        }
+        if (this.sortingData[fieldType].sort == 'desc') {
+          this.dataSource = this.dataSource.sort((a, b) => {
+            return new Date(a.createdDate).getTime() > new Date(b.createdDate).getTime() ? -1 : -1;
+          })
+        }
+        this.sortingData[1].sort = "";
+        break;
+      }
+    }
     this.handlePageEvent({
       length: this.length,
       pageIndex: this.pageIndex,
@@ -160,6 +218,7 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
     this.subscription.forEach(ele => {
       ele.unsubscribe();
     })
+    clearInterval(this.timeInterval);
   }
 
 }

@@ -17,7 +17,7 @@
         <div class="document-container-parent">
             <div class="mat-elevation-z2 list-container">
                 <div class="heading-container">
-                    <span class="heading-title">
+                    <span class="heading-title pointer" (click)="sortDoucment(1)">
                         Document Name
                         <span class="icon" *ngIf="sortingData[1]?.sort">
                             <mat-icon *ngIf="sortingData[1]?.sort == 'desc'">arrow_downward</mat-icon>
@@ -25,15 +25,15 @@
                         </span>
                     </span>
 
-                    <span class="heading-title center-text pointer" (click)="sortDoucment(1)">
+                    <span class="heading-title center-text pointer" (click)="sortDoucment(2)">
                         Date
-                    </span>
-                    <span class="heading-title center-text">
-                        Status
                         <span class="icon" *ngIf="sortingData[2]?.sort">
                             <mat-icon *ngIf="sortingData[2]?.sort == 'desc'">arrow_downward</mat-icon>
                             <mat-icon *ngIf="sortingData[2]?.sort == 'asc'">arrow_upward</mat-icon>
                         </span>
+                    </span>
+                    <span class="heading-title center-text">
+                        Status
                     </span>
                     <span class="heading-title center-text">
                         Actions

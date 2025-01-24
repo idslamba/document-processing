@@ -77,7 +77,6 @@ export class ViewDetailsComponent implements OnInit {
 
           })
         } 
-        console.log(this.parsedData)
       },
       error: (err) => {
         console.log(err);

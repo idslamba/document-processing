@@ -30,8 +30,8 @@ export class QualityServiceService {
   }
 
   downloadCode(documentId: any){
-    const serviceURL = "https://solventek-document-ai.azurewebsites.net/api/download";
-    return this.httpService.get(serviceURL, { documentId: documentId });
+    const serviceURL = `https://solventek-document-ai.azurewebsites.net/api/download/${documentId}`;
+    return this.httpService.get(serviceURL, undefined);
   }
 
 }
