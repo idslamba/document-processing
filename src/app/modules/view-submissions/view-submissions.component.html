@@ -66,7 +66,7 @@
                                     Completed
                                 </ng-container> -->
                             </span>
-                            <span class="list-object center-text parent-object">
+                            <span class="list-object center-text parent-object" [ngClass]="{'disabled': document?.status != 'Complete'}">
                                <span class="option pointer center-text medium" [routerLink]="['/view-submissions/details', document?.id]">View Details</span>
                                <span class="option pointer center-text medium" (click)="selectDocument(idx)" [routerLink]="['/view-submissions', document?.id]">Start QC</span>
                             </span>

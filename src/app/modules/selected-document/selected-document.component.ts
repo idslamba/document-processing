@@ -16,6 +16,16 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { DialogService } from '../../shared/services/dialog.service';
 import { AngularSplitModule } from 'angular-split';
 
+
+interface ParsedData {
+  key: string;
+  page: number;
+  confidence: number;
+  value: string;
+  updatedValue?: string;
+  children?: ParsedData[];
+}
+
 @Component({
   selector: 'app-selected-document',
   standalone: true,
@@ -51,6 +61,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   rectangle: { x: number, y: number, width: number, height: number } = { x: 0, y: 0, width: 0, height: 0 };
   selectedConfidenceType: string = "";
   editSet: Set<string> = new Set();
+  parsedData: Array<ParsedData> = [];
 
   constructor(private qualityReviewService: QualityServiceService, private http: HttpClient,
     private snackbarService: SnackbarService, private route: ActivatedRoute, private commonService: CommonService, private dialogService: DialogService) { }
@@ -73,59 +84,64 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         this.selectedDocument = data[0];
 
 
-        // const parsedData =this.selectedDocument.result;
-        // Object.keys(parsedData).forEach((key: string) => {
-        //   if (parsedData[key]['value']?.length && parsedData[key]['confidence'] >= 0) {
-        //     this.parsedData.push({
-        //       key: key,
-        //       confidence: parsedData[key]['confidence'],
-        //       value: parsedData[key]['value']
-        //     });
-        //   } else if (Object.keys(parsedData[key]).length) {
-        //     const children: any = [];
-        //     Object.keys(parsedData[key]).forEach((childKey: string) => {
-        //       if (parsedData[key][childKey] && parsedData[key][childKey]['value']?.length && parsedData[key][childKey]['confidence'] >= 0) {
-        //         children.push({
-        //           key: childKey,
-        //           confidence: parsedData[key][childKey]['confidence'],
-        //           value: parsedData[key][childKey]['value']
-        //         });
-        //       }
+        const parsedData = this.selectedDocument.result;
+        Object.keys(parsedData).forEach((key: string) => {
+          if (parsedData[key]['value']?.length && parsedData[key]['confidence'] >= 0) {
+            this.parsedData.push({
+              key: key,
+              confidence: parsedData[key]['confidence'],
+              value: parsedData[key]['value'],
+              page: parsedData[key]['page'],
+              updatedValue: parsedData[key]['updatedValue']
+            });
+          } else if (Object.keys(parsedData[key]).length) {
+            const children: Array<ParsedData> = [];
+            Object.keys(parsedData[key]).forEach((childKey: string) => {
+              if (parsedData[key][childKey] && parsedData[key][childKey]['value']?.length && parsedData[key][childKey]['confidence'] >= 0) {
+                children.push({
+                  key: childKey,
+                  confidence: parsedData[key][childKey]['confidence'],
+                  value: parsedData[key][childKey]['value'],
+                  page: parsedData[key][childKey]['page'],
+                  updatedValue: parsedData[key][childKey]['updatedValue']
+                });
+              }
 
-        //     });
-        //     this.parsedData.push({
-        //       key: key,
-        //       confidence: 100,
-        //       value: "",
-        //       children: children
-        //     });
+            });
+            this.parsedData.push({
+              key: key,
+              confidence: 100,
+              value: "",
+              children: children,
+              updatedValue: "",
+              page:0
+            });
 
-        //   }
-
-        // })
-
-
-
-        console.log(JSON.parse(this.selectedDocument.result));
-        if (this.selectedDocument?.results?.pages?.length) {
-          for (let i = 0; i < this.selectedDocument.results.pages.length; i++) {
-            // this.totalPages.push(i + 1);
-            this.pagesDimensions.push({ index: i + 1, unit: this.selectedDocument.results.pages[i].unit, dimension: { height: this.selectedDocument.results.pages[i].height, width: this.selectedDocument.results.pages[i].width } })
           }
-        }
-        Object.keys(data[0].results.documents[0].fields).forEach(ele => {
-          this.fields.push({
-            name: ele,
-            type: data[0].results.documents[0].fields[ele].kind,
-            content: data[0].results.documents[0].fields[ele].content || "",
-            updatedContent: data[0].results.documents[0].fields[ele].updatedContent,
-            boundingRegions: data[0].results.documents[0].fields[ele].boundingRegions,
-            confidence: data[0].results.documents[0].fields[ele].confidence * 100
-          });
-          // if (data[0].results.documents[0].fields[ele].content?.length) {
-          // }
+
         })
-        this.displayFields = JSON.parse(JSON.stringify(this.fields));
+        console.log(this.parsedData);
+
+        // console.log(JSON.parse(this.selectedDocument.result));
+        // if (this.selectedDocument?.results?.pages?.length) {
+        //   for (let i = 0; i < this.selectedDocument.results.pages.length; i++) {
+        //     // this.totalPages.push(i + 1);
+        //     this.pagesDimensions.push({ index: i + 1, unit: this.selectedDocument.results.pages[i].unit, dimension: { height: this.selectedDocument.results.pages[i].height, width: this.selectedDocument.results.pages[i].width } })
+        //   }
+        // }
+        // Object.keys(data[0].results.documents[0].fields).forEach(ele => {
+        //   this.fields.push({
+        //     name: ele,
+        //     type: data[0].results.documents[0].fields[ele].kind,
+        //     content: data[0].results.documents[0].fields[ele].content || "",
+        //     updatedContent: data[0].results.documents[0].fields[ele].updatedContent,
+        //     boundingRegions: data[0].results.documents[0].fields[ele].boundingRegions,
+        //     confidence: data[0].results.documents[0].fields[ele].confidence * 100
+        //   });
+        //   // if (data[0].results.documents[0].fields[ele].content?.length) {
+        //   // }
+        // })
+        // this.displayFields = JSON.parse(JSON.stringify(this.fields));
         // this.contentData = this.fields.map(ele => ele.content);
         // this.contentDataUpdated = JSON.parse(JSON.stringify(this.contentData));
         this.isFieldChanged = {};
@@ -136,10 +152,12 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   }
 
   async getPDFCode() {
-
-    // https://solventek-document-ai.azurewebsites.net/api/download/5eb51b8c-93e3-42b0-94d9-7e7a1536135f
-
-    this.qualityReviewService.downloadCode(this.selectedDocument.id).subscribe((response: any) => {
+    this.http.get(`https://solventek-document-ai.azurewebsites.net/api/download/${this.selectedDocument.id}`, {
+      responseType: 'arraybuffer',
+      headers: {
+        'x-functions-key': "9lmWqLpl9CH6f8vfhZaG2IoN7Be7GMZTDuj-P75umrh8AzFusnUS8Q=="
+      }
+    }).subscribe((response: any) => {
       pdfjsLib.getDocument(response).promise.then(async (pdf: any) => {
         this.pdf = pdf;
         this.totalPages = [];
@@ -164,7 +182,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
       error: (err) => {
         console.log(err);
       }
-
     });
   }
 

@@ -8,8 +8,8 @@ export class QualityServiceService {
 
   selectedDocument: any;
 
-  selectedProjectId:any;
-  selectedWorkflowId:any;
+  selectedProjectId: any;
+  selectedWorkflowId: any;
 
   constructor(private httpService: HttpService) { }
 
@@ -24,14 +24,19 @@ export class QualityServiceService {
     return this.httpService.post(serviceUrl, { documentIds: [documentId] }, undefined)
   }
 
-  docDetails(documentId: any){
+  docDetails(documentId: any) {
     const serviceURL = "https://solventek-document-ai.azurewebsites.net/api/document_results";
     return this.httpService.post(serviceURL, { documentIds: [documentId] }, undefined)
   }
 
-  downloadCode(documentId: any){
+  downloadCode(documentId: any) {
     const serviceURL = `https://solventek-document-ai.azurewebsites.net/api/download/${documentId}`;
     return this.httpService.get(serviceURL, undefined);
   }
+
+  // downloadCodePost(documentId: any) {
+  //   const serviceURL = `https://rpa-services.azurewebsites.net/api/Download`;
+  //   return this.httpService.post(serviceURL, undefined);
+  // }
 
 }
