@@ -43,7 +43,7 @@
 
                                 <div class="field">
                                     <div class="field-top">
-                                        <div class="name ellipsis pointer" #tooltip="matTooltip"
+                                        <div (click)="highlightField(node)" class="name ellipsis pointer" #tooltip="matTooltip"
                                             [matTooltip]="node?.key">
                                             {{node?.key}}
                                         </div>
@@ -70,7 +70,7 @@
                                     <div class="field-bottom"
                                         *ngIf="node?.updatedValue?.length || editSet.has(node?.key)">
                                         <input (keydown)="confidenceChanged(node)" type="text"
-                                            [(ngModel)]="node.updatedValue" class="input-field"
+                                            [(ngModel)]="updatedContent[node.key]" class="input-field"
                                             [disabled]="!editSet.has(node?.key)">
                                     </div>
 
@@ -103,52 +103,6 @@
                             </mat-nested-tree-node>
                         </mat-tree>
                     </div>
-
-
-
-                    <!-- <div class="field-container" *ngIf="displayFields?.length && !showSkeleton">
-                        <div class="field" *ngFor="let field of displayFields;let idx=index">
-                            <div class="field-top">
-                                <div class="name ellipsis pointer" #tooltip="matTooltip" [matTooltip]="node?.key"
-                                    (click)="highlightField(idx)">
-                                    {{node?.key}}
-                                </div>
-                                <div class="reset pointer">
-                                    <ng-container *ngIf="isFieldChanged[node?.key]">
-                                        <mat-icon #tooltip="matTooltip" matTooltip="Reset Content" class="reset-icon"
-                                            (click)="restoreFieldData(node?.key)">restart_alt</mat-icon>
-                                    </ng-container>
-                                </div>
-                                <div class="input ellipsis" #tooltip="matTooltip" [matTooltip]="node?.content">
-                                    {{node?.content}}
-                                </div>
-
-                                <div #tooltip="matTooltip" [matTooltip]="node?.confidence + ' %'"
-                                    class="confidence-container"
-                                    [ngClass]="{'high': (node?.confidence > 95), 'medium2': (node?.confidence > 95 && node?.confidence < 90), 'low': (node?.confidence < 90)}">
-
-                                </div>
-                                <div class="edit-icon pointer">
-                                    <mat-icon #tooltip="matTooltip" matTooltip="Edit Content" class="reset-icon"
-                                        (click)="editField(node?.key)">edit</mat-icon>
-                                </div>
-                            </div>
-                            <div class="field-bottom" *ngIf="field?.updatedContent?.length || editSet.has(node?.key)">
-                                <input (keydown)="confidenceChanged(node?.key)" type="text"
-                                    [(ngModel)]="field.updatedContent" class="input-field"
-                                    [disabled]="!editSet.has(node?.key)">
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="no-fields-available" *ngIf="!displayFields?.length && !showSkeleton">
-                        <ng-container *ngIf="selectedConfidenceType?.length">
-                            No fields are available for the selected confidence level
-                        </ng-container>
-                        <ng-container *ngIf="!selectedConfidenceType?.length">
-                            No fields are available for the selected document
-                        </ng-container>
-                    </div> -->
                     <div class="skeleton" *ngIf="showSkeleton">
                         <ngx-skeleton-loader count="150" appearance="line" />
                     </div>

@@ -72,14 +72,13 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
 
 
 
-  constructor(private qualityReviewService: QualityServiceService, private http: HttpClient,
-    private snackbarService: SnackbarService, private route: ActivatedRoute, private commonService: CommonService, private dialogService: DialogService) { }
+  constructor(private readonly qualityReviewService: QualityServiceService, private readonly http: HttpClient,
+    private readonly snackbarService: SnackbarService, private readonly route: ActivatedRoute, private readonly commonService: CommonService, private readonly dialogService: DialogService) { }
 
   async ngOnInit() {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.min.mjs';
-    this.selectedDocumentId = this.route.snapshot.paramMap.get('id') || "";
+    this.selectedDocumentId = this.route.snapshot.paramMap.get('id') ?? "";
     this.getDocumentInformation(this.selectedDocumentId);
-    this.getDocumentDetails(this.selectedDocumentId);
   }
 
   async getDocumentInformation(documentId: string) {
@@ -89,11 +88,8 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         this.totalPages = [];
         this.pagesDimensions = [];
         this.selectedDocument = data[0];
-        this.parsedData = this.processData(this.selectedDocument.result);
-        this.displayParsedData = JSON.parse(JSON.stringify(this.parsedData));
-        this.dataSource.data = this.displayParsedData;
-        console.log(this.displayParsedData);
-        this.isFieldChanged = {};
+        this.getPDFCode();
+        this.updateTreeNode();
       }
       this.showSkeleton = false;
     })
@@ -139,7 +135,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
           value: item.value,
           confidence: item.confidence,
           page: item.page,
-          updatedValue: item.updatedValue
+          updatedValue: this.updatedContent[item.key]
         };
       }
     });
@@ -164,20 +160,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         console.log("error", error);
       });
     })
-  }
-
-  getDocumentDetails(documentId: string) {
-    this.qualityReviewService.docDetails(documentId).subscribe({
-      next: (res: any) => {
-        if (res?.length) {
-          this.selectedDocument = res[0];
-          this.getPDFCode();
-        }
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
   }
 
   async renderPage(pageNumber: number) {
@@ -216,11 +198,10 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   }
 
   resetContent(node: ParsedData) {
-    node.updatedValue = node.value;
+    this.updatedContent[node.key] = node.updatedValue ?? node.value;
     this.isFieldChanged[node.key] = false;
     this.showUpdateButton = false;
     this.editSet.delete(node.key);
-
     Object.values(this.isFieldChanged).forEach(ele => {
       if (ele) {
         this.showUpdateButton = true;
@@ -228,46 +209,12 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     })
   }
 
-  restoreFieldData(name: string) {
-    // let index = this.displayFields.findIndex(ele => ele.name == name);
-    // if (index != -1) {
-    //   this.displayFields[index].updatedContent = this.displayFields[index].content;
-    //   this.isFieldChanged[this.displayFields[index].name] = false;
-    //   this.editSet.delete(name);
-    //   this.showUpdateButton = false;
-    //   Object.values(this.isFieldChanged).forEach(ele => {
-    //     if (ele) {
-    //       this.showUpdateButton = true;
-    //     }
-    //   })
-    // }
-  }
-
-  async highlightField(index: number) {
-    // if (this.seletedPage != this.displayFields[index].boundingRegions[0].pageNumber) {
-    //   this.seletedPage = this.displayFields[index].boundingRegions[0].pageNumber;
-    // }
-    // await this.renderPage(this.seletedPage);
-    // if (this.displayFields[index]?.boundingRegions[0]?.polygon?.length == 4) {
-    //   const canvas = document.getElementById('canvas') as any;
-    //   const width = canvas.width;
-    //   const height = canvas.height;
-    //   const widthRatio = width / this.pagesDimensions[this.seletedPage - 1].dimension.width;
-    //   const heightRatio = height / this.pagesDimensions[this.seletedPage - 1].dimension.height;
-    //   const contextX = this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio;
-    //   const contextY = this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio;
-    //   this.scrollToPoint(contextX, contextY);
-    //   const context = canvas.getContext('2d');
-    //   context.beginPath();
-    //   context.lineWidth = 2;
-    //   context.strokeStyle = "red";
-    //   context.moveTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
-    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[1].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[1].y * heightRatio);
-    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[2].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[2].y * heightRatio);
-    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[3].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[3].y * heightRatio);
-    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
-    //   context.stroke();
-    // }
+  async highlightField(node: ParsedData) {
+    if (node.page != this.seletedPage) {
+      this.seletedPage = node.page;
+      this.snackbarService.showSnackbar([`Please wait while the page no ${this.seletedPage} is being loaded`], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
+      await this.renderPage(this.seletedPage);
+    }
   }
 
   scrollToPoint(x: number, y: number) {
@@ -370,11 +317,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         console.log(this.displayParsedData)
       }
     })
-
-
-
-
-
   }
 
   filterNodesByConfidence(data: ParsedData[], confidenceThreshold: (confidence: number) => boolean): ParsedData[] {
@@ -393,98 +335,32 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     }, []);
   }
 
-  saveContent() {
+  updateTreeNode() {
+    this.parsedData = this.processData(this.selectedDocument.result);
+    this.displayParsedData = JSON.parse(JSON.stringify(this.parsedData));
+    this.dataSource.data = this.displayParsedData;
+    this.isFieldChanged = {};
+    console.log(this.displayParsedData);
+  }
 
-    let obj = this.convertArrayToObject(this.parsedData);
+  saveContent() {
+    let obj = this.convertArrayToObject(this.displayParsedData);
     console.log(obj);
     if (Object.keys(obj)) {
       this.qualityReviewService.updateDocumentFields(this.selectedDocumentId, obj).subscribe((data: any) => {
         if (data) {
           this.snackbarService.showSnackbar(["Document updated successfully"], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
+          this.isFieldChanged = {};
+          this.editSet = new Set();
+          this.selectedDocument = data;
+          this.updateTreeNode();
         }
       })
     }
-
-    // if (this.selectedDocument.assignee && (this.selectedDocument.assignee != this.profile?.username)) {
-    //   this.snackbarService.showSnackbar([`This document is locked by ${this.selectedDocument.assignee}`], undefined, SolventekConstants.MESSAGE_TYPES.ERROR);
-    //   return;
-    // }
-    // let assignee = this.selectedDocument.assignee;
-    // if (!this.selectedDocument.assignee || (this.selectedDocument.assignee == this.profile?.username)) {
-    //   this.selectedDocument.assignee = this.profile?.username;
-    //   this.selectedDocument.lastUpdatedDate = new Date().toISOString();
-    //   this.selectedDocument.documentStatus = "progress";
-    //   this.selectedDocument.completedBy = this.profile?.username;
-    //   this.qualityReviewService.updateAssigneeInDocument(this.selectedDocumentId, this.selectedDocument).subscribe((data: any) => {
-    //     if (data.id) {
-    //       //API is succesfull
-    //     }
-    //     // this.snackbarService.showSnackbar([`This document is locked by ${this.selectedDocument.assignee}`], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
-    //   })
-    // }
-
-    // this.displayFields.forEach(ele => {
-    //   let index = this.fields.findIndex(field => field.name == ele.name);
-    //   if (index != -1) {
-    //     this.fields[index].updatedContent = ele.updatedContent;
-    //   }
-    // })
-
-    // this.fields.forEach(ele => {
-    //   this.selectedDocument.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
-    // })
-    // this.selectedDocument.lastUpdatedDate = new Date().toISOString();
-    // this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocument).subscribe((data: any) => {
-    //   if (data.id) {
-    //     this.isFieldChanged = {};
-    //     this.editSet = new Set();
-    //     this.snackbarService.showSnackbar([`This document is now locked by ${this.selectedDocument.assignee}`, `Fields are now updated`], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
-    //     if (!assignee) {
-    //       this.updatePendingCount();
-    //     }
-    //   }
-    // })
   }
 
   async submitContent() {
-
-    // this.dialogService.openDialog(`Are you sure you want to submit this document, it will be marked as completed`,).subscribe(result => {
-    //   if (result) {
-    //     if (this.selectedDocument.assignee && (this.selectedDocument.assignee != this.profile?.username)) {
-    //       this.snackbarService.showSnackbar([`This document is locked by ${this.selectedDocument.assignee}`], undefined, SolventekConstants.MESSAGE_TYPES.ERROR);
-    //       return;
-    //     }
-    //     if (!this.selectedDocument.assignee || (this.selectedDocument.assignee == this.profile?.username)) {
-    //       this.selectedDocument.assignee = this.profile?.username;
-    //       this.selectedDocument.lastUpdatedDate = new Date().toISOString();
-    //       this.selectedDocument.documentStatus = "completed";
-    //       this.selectedDocument.completedBy = this.profile?.username;
-    //       this.qualityReviewService.updateAssigneeInDocument(this.selectedDocumentId, this.selectedDocument).subscribe(data => {
-
-    //       })
-    //     }
-    //     this.displayFields.forEach(ele => {
-    //       let index = this.fields.findIndex(field => field.name == ele.name);
-    //       if (index != -1) {
-    //         this.fields[index].updatedContent = ele.updatedContent;
-    //       }
-    //     })
-
-    //     this.fields.forEach(ele => {
-    //       this.selectedDocument.results.documents[0].fields[ele.name]['updatedContent'] = ele.updatedContent;
-    //     })
-    //     this.selectedDocument.lastUpdatedDate = new Date().toISOString();
-    //     this.selectedDocument.documentStatus = "completed";
-    //     this.qualityReviewService.updateFieldsInDocument(this.selectedDocumentId, this.selectedDocument).subscribe(data => {
-    //       if (data) {
-    //         this.isFieldChanged = {};
-    //         this.editSet = new Set();
-    //         this.snackbarService.showSnackbar([`This document is completed by ${this.selectedDocument.assignee}`], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
-    //       }
-    //     })
-
-    //   }
-    // })
+    this.saveContent();
   }
 
   goToQualityReview() {
@@ -505,7 +381,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
 
   async pageSeleted(pageNumber: number) {
     this.seletedPage = pageNumber;
-    await this.renderPage(pageNumber);
   }
 
 
