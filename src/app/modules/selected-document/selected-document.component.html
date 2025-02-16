@@ -33,37 +33,110 @@
                                 [ngClass]="{'selected': selectedConfidenceType == 'high'}"></div>
                         </div>
                     </div>
-                    <div class="field-container" *ngIf="displayFields?.length && !showSkeleton">
-                        <div class="field" *ngFor="let field of displayFields;let idx=index">
-                            <div class="field-top">
-                                <div class="name ellipsis pointer" #tooltip="matTooltip" [matTooltip]="field.name"
-                                    (click)="highlightField(idx)">
-                                    {{field.name}}
-                                </div>
-                                <div class="reset pointer">
-                                    <ng-container *ngIf="isFieldChanged[field.name]">
-                                        <mat-icon #tooltip="matTooltip" matTooltip="Reset Content" class="reset-icon"
-                                            (click)="restoreFieldData(field.name)">restart_alt</mat-icon>
-                                    </ng-container>
-                                </div>
-                                <div class="input ellipsis" #tooltip="matTooltip" [matTooltip]="field.content">
-                                    {{field.content}}
+
+                    <div class="field-container">
+                        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+                            <!-- This is the tree node template for leaf nodes -->
+                            <!-- There is inline padding applied to this node using styles.
+                              This padding value depends on the mat-icon-button width. -->
+                            <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+
+                                <div class="field">
+                                    <div class="field-top">
+                                        <div class="name ellipsis pointer" #tooltip="matTooltip"
+                                            [matTooltip]="node?.key">
+                                            {{node?.key}}
+                                        </div>
+                                        <div class="reset pointer">
+                                            <ng-container *ngIf="isFieldChanged[node?.key]">
+                                                <mat-icon (click)="resetContent(node)" #tooltip="matTooltip"
+                                                    matTooltip="Reset Content" class="reset-icon">restart_alt</mat-icon>
+                                            </ng-container>
+                                        </div>
+                                        <div class="input ellipsis" #tooltip="matTooltip" [matTooltip]="node?.content">
+                                            {{node.value}}
+                                        </div>
+
+                                        <div #tooltip="matTooltip" [matTooltip]="(node?.confidence*100) + ' %'"
+                                            class="confidence-container"
+                                            [ngClass]="{'high': (node?.confidence >= 0.95), 'medium2': (node?.confidence < 0.95 && node?.confidence >= 0.90), 'low': (node?.confidence < 0.90)}">
+
+                                        </div>
+                                        <div class="edit-icon pointer">
+                                            <mat-icon #tooltip="matTooltip" matTooltip="Edit Content" class="reset-icon"
+                                                (click)="editField(node)">edit</mat-icon>
+                                        </div>
+                                    </div>
+                                    <div class="field-bottom"
+                                        *ngIf="node?.updatedValue?.length || editSet.has(node?.key)">
+                                        <input (keydown)="confidenceChanged(node)" type="text"
+                                            [(ngModel)]="node.updatedValue" class="input-field"
+                                            [disabled]="!editSet.has(node?.key)">
+                                    </div>
+
                                 </div>
 
-                                <div #tooltip="matTooltip" [matTooltip]="field.confidence + ' %'"
+                            </mat-tree-node>
+                            <!-- This is the tree node template for expandable nodes -->
+                            <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                                <div class="mat-tree-node">
+                                    <mat-icon matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.key">
+                                        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                                    </mat-icon>
+                                    <div class="name">
+                                        {{node?.key}}
+                                    </div>
+
+                                    <div #tooltip="matTooltip" [matTooltip]="(node?.confidence*100) + ' %'"
+                                        class="confidence-container"
+                                        [ngClass]="{'high': (node?.confidence >= 0.95), 'medium2': (node?.confidence < 0.95 && node?.confidence >= 0.90), 'low': (node?.confidence < 0.90)}">
+
+                                    </div>
+                                </div>
+
+
+                                <!-- There is inline padding applied to this div using styles.
+                                    This padding value depends on the mat-icon-button width.  -->
+                                <div [class.example-tree-invisible]="!treeControl.isExpanded(node)" role="group">
+                                    <ng-container matTreeNodeOutlet></ng-container>
+                                </div>
+                            </mat-nested-tree-node>
+                        </mat-tree>
+                    </div>
+
+
+
+                    <!-- <div class="field-container" *ngIf="displayFields?.length && !showSkeleton">
+                        <div class="field" *ngFor="let field of displayFields;let idx=index">
+                            <div class="field-top">
+                                <div class="name ellipsis pointer" #tooltip="matTooltip" [matTooltip]="node?.key"
+                                    (click)="highlightField(idx)">
+                                    {{node?.key}}
+                                </div>
+                                <div class="reset pointer">
+                                    <ng-container *ngIf="isFieldChanged[node?.key]">
+                                        <mat-icon #tooltip="matTooltip" matTooltip="Reset Content" class="reset-icon"
+                                            (click)="restoreFieldData(node?.key)">restart_alt</mat-icon>
+                                    </ng-container>
+                                </div>
+                                <div class="input ellipsis" #tooltip="matTooltip" [matTooltip]="node?.content">
+                                    {{node?.content}}
+                                </div>
+
+                                <div #tooltip="matTooltip" [matTooltip]="node?.confidence + ' %'"
                                     class="confidence-container"
-                                    [ngClass]="{'high': (field.confidence > 95), 'medium2': (field.confidence > 95 && field.confidence < 90), 'low': (field.confidence < 90)}">
+                                    [ngClass]="{'high': (node?.confidence > 95), 'medium2': (node?.confidence > 95 && node?.confidence < 90), 'low': (node?.confidence < 90)}">
 
                                 </div>
                                 <div class="edit-icon pointer">
                                     <mat-icon #tooltip="matTooltip" matTooltip="Edit Content" class="reset-icon"
-                                        (click)="editField(field.name)">edit</mat-icon>
+                                        (click)="editField(node?.key)">edit</mat-icon>
                                 </div>
                             </div>
-                            <div class="field-bottom" *ngIf="field?.updatedContent?.length || editSet.has(field.name)">
-                                <input (keydown)="confidenceChanged(field.name)" type="text"
+                            <div class="field-bottom" *ngIf="field?.updatedContent?.length || editSet.has(node?.key)">
+                                <input (keydown)="confidenceChanged(node?.key)" type="text"
                                     [(ngModel)]="field.updatedContent" class="input-field"
-                                    [disabled]="!editSet.has(field.name)">
+                                    [disabled]="!editSet.has(node?.key)">
                             </div>
 
                         </div>
@@ -75,7 +148,7 @@
                         <ng-container *ngIf="!selectedConfidenceType?.length">
                             No fields are available for the selected document
                         </ng-container>
-                    </div>
+                    </div> -->
                     <div class="skeleton" *ngIf="showSkeleton">
                         <ngx-skeleton-loader count="150" appearance="line" />
                     </div>
@@ -103,12 +176,15 @@
 
     </div>
     <div class="buttons-container">
-        <div class="buttons">
+        <mat-paginator [showFirstLastButtons]="true" (page)="handlePageEvent($event)" [pageSizeOptions]="[]"
+            [pageIndex]="0" [length]="totalPages.length" [pageSize]="'1'" aria-label="Select page">
+        </mat-paginator>
+        <!-- <div class="buttons">
             <div class="page pointer" [ngClass]="{'selected-page': page == seletedPage}" (click)="pageSeleted(page)"
                 *ngFor="let page of totalPages;let idx=index">
                 {{page}}
             </div>
-        </div>
+        </div> -->
     </div>
 
 

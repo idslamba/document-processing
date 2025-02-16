@@ -15,6 +15,9 @@ import { CommonService } from '../../shared/services/common.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { DialogService } from '../../shared/services/dialog.service';
 import { AngularSplitModule } from 'angular-split';
+import { MatTreeModule, MatTreeNestedDataSource } from '@angular/material/tree';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 
 interface ParsedData {
@@ -30,7 +33,7 @@ interface ParsedData {
   selector: 'app-selected-document',
   standalone: true,
   imports: [CommonModule, FormsModule, MatTooltipModule, MatIconModule,
-    NgxSkeletonLoaderModule, RouterLink, RouterLinkActive, RouterOutlet, MatDialogModule, AngularSplitModule],
+    NgxSkeletonLoaderModule, RouterLink, MatPaginatorModule, MatTreeModule, MatDialogModule, AngularSplitModule],
   templateUrl: './selected-document.component.html',
   styleUrl: './selected-document.component.scss'
 })
@@ -55,13 +58,19 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   canvasHeight: number = 0;
   scale: number = 1;
   pdfLoading: boolean = true;
-  displayFields: Array<{ content: string, updatedContent?: string, type: string, boundingRegions: any, name: string, confidence: number }> = [];
-  fields: Array<{ content: string, updatedContent?: string, type: string, boundingRegions: any, name: string, confidence: number }> = [];
   pagesDimensions: Array<{ index: number, dimension: { height: number, width: number }, unit: string }> = [];
   rectangle: { x: number, y: number, width: number, height: number } = { x: 0, y: 0, width: 0, height: 0 };
   selectedConfidenceType: string = "";
   editSet: Set<string> = new Set();
   parsedData: Array<ParsedData> = [];
+  displayParsedData: Array<ParsedData> = [];
+  treeControl = new NestedTreeControl<ParsedData>(node => node.children);
+  dataSource = new MatTreeNestedDataSource<ParsedData>();
+  hasChild = (_: number, node: ParsedData) => !!node.children && node.children.length > 0;
+  content: any = {};
+  updatedContent: any = {};
+
+
 
   constructor(private qualityReviewService: QualityServiceService, private http: HttpClient,
     private snackbarService: SnackbarService, private route: ActivatedRoute, private commonService: CommonService, private dialogService: DialogService) { }
@@ -77,78 +86,64 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     this.showSkeleton = true;
     this.qualityReviewService.getAllDocumentDetails(documentId).subscribe((data: any) => {
       if (data?.length) {
-        this.fields = [];
-        this.displayFields = [];
         this.totalPages = [];
         this.pagesDimensions = [];
         this.selectedDocument = data[0];
-
-
-        const parsedData = this.selectedDocument.result;
-        Object.keys(parsedData).forEach((key: string) => {
-          if (parsedData[key]['value']?.length && parsedData[key]['confidence'] >= 0) {
-            this.parsedData.push({
-              key: key,
-              confidence: parsedData[key]['confidence'],
-              value: parsedData[key]['value'],
-              page: parsedData[key]['page'],
-              updatedValue: parsedData[key]['updatedValue']
-            });
-          } else if (Object.keys(parsedData[key]).length) {
-            const children: Array<ParsedData> = [];
-            Object.keys(parsedData[key]).forEach((childKey: string) => {
-              if (parsedData[key][childKey] && parsedData[key][childKey]['value']?.length && parsedData[key][childKey]['confidence'] >= 0) {
-                children.push({
-                  key: childKey,
-                  confidence: parsedData[key][childKey]['confidence'],
-                  value: parsedData[key][childKey]['value'],
-                  page: parsedData[key][childKey]['page'],
-                  updatedValue: parsedData[key][childKey]['updatedValue']
-                });
-              }
-
-            });
-            this.parsedData.push({
-              key: key,
-              confidence: 100,
-              value: "",
-              children: children,
-              updatedValue: "",
-              page:0
-            });
-
-          }
-
-        })
-        console.log(this.parsedData);
-
-        // console.log(JSON.parse(this.selectedDocument.result));
-        // if (this.selectedDocument?.results?.pages?.length) {
-        //   for (let i = 0; i < this.selectedDocument.results.pages.length; i++) {
-        //     // this.totalPages.push(i + 1);
-        //     this.pagesDimensions.push({ index: i + 1, unit: this.selectedDocument.results.pages[i].unit, dimension: { height: this.selectedDocument.results.pages[i].height, width: this.selectedDocument.results.pages[i].width } })
-        //   }
-        // }
-        // Object.keys(data[0].results.documents[0].fields).forEach(ele => {
-        //   this.fields.push({
-        //     name: ele,
-        //     type: data[0].results.documents[0].fields[ele].kind,
-        //     content: data[0].results.documents[0].fields[ele].content || "",
-        //     updatedContent: data[0].results.documents[0].fields[ele].updatedContent,
-        //     boundingRegions: data[0].results.documents[0].fields[ele].boundingRegions,
-        //     confidence: data[0].results.documents[0].fields[ele].confidence * 100
-        //   });
-        //   // if (data[0].results.documents[0].fields[ele].content?.length) {
-        //   // }
-        // })
-        // this.displayFields = JSON.parse(JSON.stringify(this.fields));
-        // this.contentData = this.fields.map(ele => ele.content);
-        // this.contentDataUpdated = JSON.parse(JSON.stringify(this.contentData));
+        this.parsedData = this.processData(this.selectedDocument.result);
+        this.displayParsedData = JSON.parse(JSON.stringify(this.parsedData));
+        this.dataSource.data = this.displayParsedData;
+        console.log(this.displayParsedData);
         this.isFieldChanged = {};
-
       }
       this.showSkeleton = false;
     })
+  }
+
+  processData(parsedData: any): ParsedData[] {
+    const result: ParsedData[] = [];
+    Object.keys(parsedData).forEach((key: string) => {
+      const { value = '', confidence = -1, page = 0, updatedValue = '' } = parsedData[key] || {};
+      if (confidence >= 0) {
+        result.push({
+          key,
+          confidence,
+          value,
+          page,
+          updatedValue
+        });
+        this.content[key] = value;
+        this.updatedContent[key] = updatedValue;
+      } else if (parsedData[key] && Object.keys(parsedData[key]).length) {
+        const children = this.processData(parsedData[key]);
+        const averageConfidence = children.reduce((sum, child) => sum + child.confidence, 0) / children.length;
+        result.push({
+          key,
+          confidence: +averageConfidence.toFixed(2),
+          value: "",
+          children,
+          updatedValue: "",
+          page: 0
+        });
+      }
+    });
+    return result;
+  }
+
+  convertArrayToObject(parsedDataArray: ParsedData[]): Record<string, any> {
+    const result: Record<string, any> = {};
+    parsedDataArray.forEach((item: ParsedData) => {
+      if (item.children && item.children.length > 0) {
+        result[item.key] = this.convertArrayToObject(item.children);
+      } else {
+        result[item.key] = {
+          value: item.value,
+          confidence: item.confidence,
+          page: item.page,
+          updatedValue: item.updatedValue
+        };
+      }
+    });
+    return result;
   }
 
   async getPDFCode() {
@@ -211,63 +206,68 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
     })
   }
 
-  confidenceChanged(name: string) {
-    let index = this.displayFields.findIndex(ele => ele.name == name);
-    if (index != -1) {
-      setTimeout(() => {
-        if (this.displayFields[index].content != this.displayFields[index].updatedContent) {
-          this.isFieldChanged[this.displayFields[index].name] = true;
-          this.showUpdateButton = true;
-        }
-      }, 100);
-    }
+  confidenceChanged(node: ParsedData) {
+    setTimeout(() => {
+      if (node.value != node.updatedValue) {
+        this.isFieldChanged[node.key] = true;
+        this.showUpdateButton = true;
+      }
+    }, 100);
+  }
+
+  resetContent(node: ParsedData) {
+    node.updatedValue = node.value;
+    this.isFieldChanged[node.key] = false;
+    this.showUpdateButton = false;
+    this.editSet.delete(node.key);
+
+    Object.values(this.isFieldChanged).forEach(ele => {
+      if (ele) {
+        this.showUpdateButton = true;
+      }
+    })
   }
 
   restoreFieldData(name: string) {
-    let index = this.displayFields.findIndex(ele => ele.name == name);
-    if (index != -1) {
-      this.displayFields[index].updatedContent = this.displayFields[index].content;
-      this.isFieldChanged[this.displayFields[index].name] = false;
-      this.editSet.delete(name);
-      this.showUpdateButton = false;
-      Object.values(this.isFieldChanged).forEach(ele => {
-        if (ele) {
-          this.showUpdateButton = true;
-        }
-      })
-    }
-  }
-
-  async pageSeleted(pageNumber: number) {
-    this.seletedPage = pageNumber;
-    await this.renderPage(pageNumber);
+    // let index = this.displayFields.findIndex(ele => ele.name == name);
+    // if (index != -1) {
+    //   this.displayFields[index].updatedContent = this.displayFields[index].content;
+    //   this.isFieldChanged[this.displayFields[index].name] = false;
+    //   this.editSet.delete(name);
+    //   this.showUpdateButton = false;
+    //   Object.values(this.isFieldChanged).forEach(ele => {
+    //     if (ele) {
+    //       this.showUpdateButton = true;
+    //     }
+    //   })
+    // }
   }
 
   async highlightField(index: number) {
-    if (this.seletedPage != this.displayFields[index].boundingRegions[0].pageNumber) {
-      this.seletedPage = this.displayFields[index].boundingRegions[0].pageNumber;
-    }
-    await this.renderPage(this.seletedPage);
-    if (this.displayFields[index]?.boundingRegions[0]?.polygon?.length == 4) {
-      const canvas = document.getElementById('canvas') as any;
-      const width = canvas.width;
-      const height = canvas.height;
-      const widthRatio = width / this.pagesDimensions[this.seletedPage - 1].dimension.width;
-      const heightRatio = height / this.pagesDimensions[this.seletedPage - 1].dimension.height;
-      const contextX = this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio;
-      const contextY = this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio;
-      this.scrollToPoint(contextX, contextY);
-      const context = canvas.getContext('2d');
-      context.beginPath();
-      context.lineWidth = 2;
-      context.strokeStyle = "red";
-      context.moveTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
-      context.lineTo(this.displayFields[index].boundingRegions[0].polygon[1].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[1].y * heightRatio);
-      context.lineTo(this.displayFields[index].boundingRegions[0].polygon[2].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[2].y * heightRatio);
-      context.lineTo(this.displayFields[index].boundingRegions[0].polygon[3].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[3].y * heightRatio);
-      context.lineTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
-      context.stroke();
-    }
+    // if (this.seletedPage != this.displayFields[index].boundingRegions[0].pageNumber) {
+    //   this.seletedPage = this.displayFields[index].boundingRegions[0].pageNumber;
+    // }
+    // await this.renderPage(this.seletedPage);
+    // if (this.displayFields[index]?.boundingRegions[0]?.polygon?.length == 4) {
+    //   const canvas = document.getElementById('canvas') as any;
+    //   const width = canvas.width;
+    //   const height = canvas.height;
+    //   const widthRatio = width / this.pagesDimensions[this.seletedPage - 1].dimension.width;
+    //   const heightRatio = height / this.pagesDimensions[this.seletedPage - 1].dimension.height;
+    //   const contextX = this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio;
+    //   const contextY = this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio;
+    //   this.scrollToPoint(contextX, contextY);
+    //   const context = canvas.getContext('2d');
+    //   context.beginPath();
+    //   context.lineWidth = 2;
+    //   context.strokeStyle = "red";
+    //   context.moveTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
+    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[1].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[1].y * heightRatio);
+    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[2].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[2].y * heightRatio);
+    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[3].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[3].y * heightRatio);
+    //   context.lineTo(this.displayFields[index].boundingRegions[0].polygon[0].x * widthRatio, this.displayFields[index].boundingRegions[0].polygon[0].y * heightRatio);
+    //   context.stroke();
+    // }
   }
 
   scrollToPoint(x: number, y: number) {
@@ -333,35 +333,78 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   }
 
   filterConfidence(confidenceType: 'high' | 'medium' | 'low') {
-    let isFieldChanged = false;
-    Object.values(this.isFieldChanged).forEach(ele => {
-      if (ele) {
-        isFieldChanged = true;
-        this.snackbarService.showSnackbar(["Please save the changes before filtering"], undefined, SolventekConstants.MESSAGE_TYPES.ERROR);
+    this.dialogService.openDialog(`Are you sure you want to filter with confidence, tree will be reloaded and unsaved progress will be lost`,).subscribe(result => {
+      if (result) {
+        let isFieldChanged = false;
+        Object.values(this.isFieldChanged).forEach(ele => {
+          if (ele) {
+            isFieldChanged = true;
+            this.snackbarService.showSnackbar(["Please save the changes before filtering"], undefined, SolventekConstants.MESSAGE_TYPES.ERROR);
+          }
+        })
+        if (isFieldChanged) return;
+        this.editSet = new Set();
+        this.isFieldChanged = {};
+        if (this.selectedConfidenceType == confidenceType) {
+          this.selectedConfidenceType = "";
+          this.displayParsedData = JSON.parse(JSON.stringify(this.parsedData));
+        } else {
+          this.selectedConfidenceType = confidenceType;
+          let confidenceThreshold: (confidence: number) => boolean;
+          switch (confidenceType) {
+            case 'low':
+              confidenceThreshold = (confidence: number) => confidence < 90;
+              break;
+            case 'medium':
+              confidenceThreshold = (confidence: number) => confidence >= 90 && confidence < 95;
+              break;
+            case 'high':
+              confidenceThreshold = (confidence: number) => confidence >= 95;
+              break;
+            default:
+              confidenceThreshold = () => true;
+          }
+          this.displayParsedData = this.filterNodesByConfidence(this.parsedData, confidenceThreshold);
+        }
+        this.dataSource.data = this.displayParsedData;
+        console.log(this.displayParsedData)
       }
     })
-    if (isFieldChanged) return;
 
-    this.editSet = new Set();
-    this.isFieldChanged = {};
-    if (this.selectedConfidenceType == confidenceType) {
-      this.selectedConfidenceType = "";
-      this.displayFields = JSON.parse(JSON.stringify(this.fields));
-    } else {
-      this.selectedConfidenceType = confidenceType
-      this.displayFields = this.fields.filter(ele => {
-        if (confidenceType == 'high') {
-          return ele.confidence >= 95;
-        } else if (confidenceType == 'medium') {
-          return ele.confidence >= 90 && ele.confidence < 95;
+
+
+
+
+  }
+
+  filterNodesByConfidence(data: ParsedData[], confidenceThreshold: (confidence: number) => boolean): ParsedData[] {
+    return data.reduce((filtered: ParsedData[], node: ParsedData) => {
+      if (confidenceThreshold(node.confidence)) {
+        if (node.children && node.children.length > 0) {
+          const filteredChildren = this.filterNodesByConfidence(node.children, confidenceThreshold);
+          if (filteredChildren.length > 0) {
+            filtered.push({ ...node, children: filteredChildren });
+          }
         } else {
-          return ele.confidence < 90;
+          filtered.push(node);
         }
-      })
-    }
+      }
+      return filtered;
+    }, []);
   }
 
   saveContent() {
+
+    let obj = this.convertArrayToObject(this.parsedData);
+    console.log(obj);
+    if (Object.keys(obj)) {
+      this.qualityReviewService.updateDocumentFields(this.selectedDocumentId, obj).subscribe((data: any) => {
+        if (data) {
+          this.snackbarService.showSnackbar(["Document updated successfully"], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
+        }
+      })
+    }
+
     // if (this.selectedDocument.assignee && (this.selectedDocument.assignee != this.profile?.username)) {
     //   this.snackbarService.showSnackbar([`This document is locked by ${this.selectedDocument.assignee}`], undefined, SolventekConstants.MESSAGE_TYPES.ERROR);
     //   return;
@@ -450,12 +493,19 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   }
 
 
-  editField(name: string) {
-    this.editSet.add(name);
-    let index = this.displayFields.findIndex(ele => ele.name == name);
-    if (index != -1) {
-      this.displayFields[index].updatedContent = this.displayFields[index].updatedContent ?? this.displayFields[index].content;
-    }
+  editField(node: ParsedData) {
+    this.editSet.add(node.key);
+    node.updatedValue = node.updatedValue || node.value;
+  }
+
+  async handlePageEvent(e: PageEvent) {
+    this.seletedPage = e.pageIndex + 1;
+    await this.renderPage(this.seletedPage);
+  }
+
+  async pageSeleted(pageNumber: number) {
+    this.seletedPage = pageNumber;
+    await this.renderPage(pageNumber);
   }
 
 

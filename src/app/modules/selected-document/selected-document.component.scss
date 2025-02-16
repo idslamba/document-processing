@@ -3,7 +3,7 @@
     width: 100%;
     overflow: hidden;
     display: grid;
-    grid-template-rows: 50px 1fr 50px;
+    grid-template-rows: 50px 1fr auto;
     padding: 12px;
 
     .top {
@@ -76,8 +76,6 @@
                 grid-template-columns: 1fr 66px;
                 padding-right: 8px;
 
-                .name {}
-
                 .buttons {
                     display: grid;
                     gap: 8px;
@@ -105,14 +103,13 @@
                     margin-bottom: 12px;
                     display: grid;
                     grid-template-rows: auto auto;
-
+                    width: 100%;
                     .field-top {
                         display: grid;
                         grid-template-columns: 1fr 18px 150px 12px 18px;
                         gap: 12px;
 
                         .name {
-                            text-decoration: underline;
                             color: var(--primary-color);
                         }
 
@@ -132,6 +129,7 @@
                                 color: black;
                                 font-size: 1.4rem;
                                 margin-top: 2px;
+                                height: 1.4rem;
                             }
                         }
 
@@ -161,6 +159,15 @@
 
 
                 }
+
+                .mat-tree-node{
+                    gap: 0.5rem;
+                    .confidence-container {
+                        height: 12px;
+                        border-radius: 50%;
+                        width: 12px;
+                    }
+                }
             }
 
             .no-fields-available {
@@ -188,7 +195,6 @@
             width: 100%;
             overflow: hidden;
             position: relative;
-            background-color: #BFC1CD;
 
             .skeleton {
                 position: absolute;
@@ -211,11 +217,8 @@
 
     .buttons-container {
         margin-top: 10px;
-        height: 40px;
         display: grid;
         place-content: center;
-        margin-left: 350px;
-
         .buttons {
             overflow: hidden;
 
@@ -255,3 +258,44 @@
 .low {
     background-color: #FF0600;
 }
+
+.example-tree-invisible {
+    display: none;
+  }
+  
+  .example-tree ul,
+  .example-tree li {
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+  }
+  
+  /*
+   * This padding sets alignment of the nested nodes.
+   */
+  .example-tree .mat-nested-tree-node div[role=group] {
+    padding-left: 40px;
+  }
+  
+  /*
+   * Padding for leaf nodes.
+   * Leaf nodes need to have padding so as to align with other non-leaf nodes
+   * under the same parent.
+   */
+  .example-tree div[role=group] > .mat-tree-node {
+    padding-left: 40px;
+
+  }
+
+  .mat-icon{
+    width: 1.5rem !important;
+    height: 1rem;
+    cursor: pointer;
+  }
+
+
+  .name {
+    color: var(--primary-color);
+}
+
+

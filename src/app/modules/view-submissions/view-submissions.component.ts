@@ -46,74 +46,53 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
   timeInterval!: any;
   documentListBackup: Array<any> = [];
   inactivityTimeout: any;
+  currentSortedField: number = 0;
   constructor(private snackbarService: SnackbarService, private commonService: CommonService, private qualityService: QualityServiceService) { }
-
-  @HostListener('window:mousemove')
-  @HostListener('window:keydown')
-  resetInactivityTimer() {
-    clearTimeout(this.inactivityTimeout);
-    this.inactivityTimeout = setTimeout(() => {
-      this.startCountdown();
-    }, 60000); // 60 seconds
-  }
-
-  // addInactivityListeners() {
-  //   window.addEventListener('mousemove', this.resetInactivityTimer.bind(this));
-  //   window.addEventListener('keydown', this.resetInactivityTimer.bind(this));
-  // }
-
-  // removeInactivityListeners() {
-  //   window.removeEventListener('mousemove', this.resetInactivityTimer.bind(this));
-  //   window.removeEventListener('keydown', this.resetInactivityTimer.bind(this));
-  // }
-
-  startCountdown() {
-    this.timeLeft = 60;
-    this.timeInterval = setInterval(() => {
-      this.timeLeft--;
-      if (this.timeLeft == 0) {
-        clearInterval(this.timeInterval);
-        this.getProjects();
-      }else if(this.timeLeft == 5){
-        this.snackbarService.showSnackbar(['Documents will be auto refreshed after 5 seconds'], SolventekConstants.DURATION);
-      }
-    }, 1000);
-  }
-
 
   ngOnInit(): void {
     this.getProjects();
-    // this.resetInactivityTimer();
-    // this.addInactivityListeners();
   }
 
-  getProjects() {
-    this.showSkeleton = true;
+  getProjects(refresh?: boolean) {
+    console.log(refresh);
+    if (!refresh)
+      this.showSkeleton = true;
     this.commonService.getDocumentsList().subscribe({
       next: (res: any) => {
         this.showSkeleton = false;
         this.dataSource = [];
         this.documentListBackup = JSON.parse(JSON.stringify(res));
-        this.clearSearch();
-          if (res?.length) {
-            res = res.sort((a:any, b:any) => new Date(a?.createdDate).getTime() > new Date(b?.createdDate).getTime() ? -1 : 1);
+        // this.clearSearch();
+        if (res?.length) {
+          if (!refresh) {
+            res = res.sort((a: any, b: any) => new Date(a?.createdDate).getTime() > new Date(b?.createdDate).getTime() ? -1 : 1);
+            this.currentSortedField = 2;
             this.sortingData[2]['sort'] = 'desc';
             this.dataSource = res
             this.documentListBackup = JSON.parse(JSON.stringify(res));
             this.length = this.dataSource.length;
             this.dataSourceTable = this.dataSource.slice(this.pageSize * this.pageIndex, this.pageSize * (this.pageIndex + 1))
+          } else {
+            this.dataSource = res;
+            this.documentListBackup = JSON.parse(JSON.stringify(res));
+            this.length = this.dataSource.length;
+            this.sortDoucment(this.currentSortedField, true);
+            this.dataSourceTable.forEach(ele => {
+              let index = this.dataSource.findIndex((ele1) => ele1.id == ele.id);
+              if (index != -1) {
+                this.dataSource[index].status = ele.status;
+              }
+            })
           }
-          this.timeLeft = 60;
-          this.timeInterval = setInterval(() => {
-            this.timeLeft--;
-            if (this.timeLeft == 0) {
-              clearInterval(this.timeInterval);
-              this.getProjects();
-            }
-            else if(this.timeLeft == 7){
-              this.snackbarService.showSnackbar(['Documents will be auto refreshed after 5 seconds'], 5000, SolventekConstants.MESSAGE_TYPES.ERROR);
-            }
-          }, 1000)
+        }
+        this.timeLeft = 10;
+        this.timeInterval = setInterval(() => {
+          this.timeLeft--;
+          if (this.timeLeft == 0) {
+            clearInterval(this.timeInterval);
+            this.getProjects(true);
+          }
+        }, 1000)
         this.showSkeleton = false;
       },
       error: (err) => {
@@ -155,14 +134,15 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
     }
   }
 
-  sortDoucment(fieldType: number) {
-
-    if (this.sortingData[fieldType]?.sort == 'asc') {
-      this.sortingData[fieldType]['sort'] = 'desc';
-    } else {
-      this.sortingData[fieldType]['sort'] = 'asc';
+  sortDoucment(fieldType: number, refresh?: boolean) {
+    if (!refresh) {
+      if (this.sortingData[fieldType]?.sort == 'asc') {
+        this.sortingData[fieldType]['sort'] = 'desc';
+      } else {
+        this.sortingData[fieldType]['sort'] = 'asc';
+      }
     }
-
+    this.currentSortedField = fieldType;
     switch (fieldType) {
       case 1: {
         if (this.sortingData[fieldType].sort == 'asc') {

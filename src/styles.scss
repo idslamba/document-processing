@@ -189,7 +189,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 .mat-icon {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .mat-mdc-snack-bar-container {
@@ -242,4 +242,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .mat-mdc-form-field-bottom-align{
   display: none;
+}
+
+.mat-tree{
+  background-color: #EBF0F5 !important;
 }
