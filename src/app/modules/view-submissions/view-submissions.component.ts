@@ -85,7 +85,7 @@ export class ViewSubmissionsComponent implements OnInit, OnDestroy {
             })
           }
         }
-        this.timeLeft = 10;
+        this.timeLeft = 120;
         this.timeInterval = setInterval(() => {
           this.timeLeft--;
           if (this.timeLeft == 0) {

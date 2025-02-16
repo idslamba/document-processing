@@ -212,7 +212,6 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   async highlightField(node: ParsedData) {
     if (node.page != this.seletedPage) {
       this.seletedPage = node.page;
-      this.snackbarService.showSnackbar([`Please wait while the page no ${this.seletedPage} is being loaded`], undefined, SolventekConstants.MESSAGE_TYPES.SUCCESS);
       await this.renderPage(this.seletedPage);
     }
   }
