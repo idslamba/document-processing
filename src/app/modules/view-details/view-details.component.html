@@ -1,5 +1,11 @@
 <div class="parent-container">
-    <div class="heading-container medium">Submission Details</div>
+    <div class="heading-container ">
+        <mat-icon class="icon pointer" #tooltip="matTooltip" matTooltip="Go to View Submissions"
+            [routerLink]="['/view-submissions']">arrow_back</mat-icon>
+        <div class="text medium">
+            Submission Details
+        </div>
+    </div>
     <div class="data-container">
 
         <div class="details">

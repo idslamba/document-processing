@@ -35,7 +35,7 @@
                     </div>
 
                     <div class="field-container">
-                        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+                        <mat-tree [dataSource]="dataSource" *ngIf="displayParsedData?.length" [treeControl]="treeControl" class="example-tree">
                             <!-- This is the tree node template for leaf nodes -->
                             <!-- There is inline padding applied to this node using styles.
                               This padding value depends on the mat-icon-button width. -->
@@ -102,6 +102,10 @@
                                 </div>
                             </mat-nested-tree-node>
                         </mat-tree>
+
+                        <div class="no-fields-available" *ngIf="!displayParsedData?.length">
+                            No response with the current filter
+                        </div>
                     </div>
                     <div class="skeleton" *ngIf="showSkeleton">
                         <ngx-skeleton-loader count="150" appearance="line" />

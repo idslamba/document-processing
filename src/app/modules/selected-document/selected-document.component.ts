@@ -114,7 +114,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
         const averageConfidence = children.reduce((sum, child) => sum + child.confidence, 0) / children.length;
         result.push({
           key,
-          confidence: +averageConfidence.toFixed(2),
+          confidence: Math.random(),
           value: "",
           children,
           updatedValue: "",
@@ -133,7 +133,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
       } else {
         result[item.key] = {
           value: item.value,
-          confidence: item.confidence,
+          confidence: Math.random(),
           page: item.page,
           updatedValue: this.updatedContent[item.key]
         };
@@ -299,13 +299,13 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
           let confidenceThreshold: (confidence: number) => boolean;
           switch (confidenceType) {
             case 'low':
-              confidenceThreshold = (confidence: number) => confidence < 90;
+              confidenceThreshold = (confidence: number) => confidence < 0.90;
               break;
             case 'medium':
-              confidenceThreshold = (confidence: number) => confidence >= 90 && confidence < 95;
+              confidenceThreshold = (confidence: number) => confidence >= 0.90 && confidence < 0.95;
               break;
             case 'high':
-              confidenceThreshold = (confidence: number) => confidence >= 95;
+              confidenceThreshold = (confidence: number) => confidence >= 0.95;
               break;
             default:
               confidenceThreshold = () => true;
@@ -321,14 +321,16 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   filterNodesByConfidence(data: ParsedData[], confidenceThreshold: (confidence: number) => boolean): ParsedData[] {
     return data.reduce((filtered: ParsedData[], node: ParsedData) => {
       if (confidenceThreshold(node.confidence)) {
-        if (node.children && node.children.length > 0) {
-          const filteredChildren = this.filterNodesByConfidence(node.children, confidenceThreshold);
-          if (filteredChildren.length > 0) {
-            filtered.push({ ...node, children: filteredChildren });
-          }
-        } else {
-          filtered.push(node);
-        }
+        filtered.push(node);
+
+        // if (node.children && node.children.length > 0) {
+        //   const filteredChildren = this.filterNodesByConfidence(node.children, confidenceThreshold);
+        //   if (filteredChildren.length > 0) {
+        //     filtered.push({ ...node, children: filteredChildren });
+        //   }
+        // } else {
+        //   filtered.push(node);
+        // }
       }
       return filtered;
     }, []);

@@ -4,10 +4,11 @@ import { Component, OnInit } from '@angular/core';
 import { QualityServiceService } from '../../shared/services/quality-service.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { CommonService } from '../../shared/services/common.service';
-import { ActivatedRoute } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink, RouterLinkActive, RouterOutlet, ActivatedRoute } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface ParsedData {
   key: string;
@@ -19,7 +20,7 @@ interface ParsedData {
 @Component({
   selector: 'app-view-details',
   standalone: true,
-  imports: [MatSlideToggleModule, CommonModule, MatExpansionModule, MatIconModule],
+  imports: [MatSlideToggleModule, CommonModule, MatExpansionModule, MatIconModule, RouterLink, MatTooltipModule],
   templateUrl: './view-details.component.html',
   styleUrl: './view-details.component.scss'
 })

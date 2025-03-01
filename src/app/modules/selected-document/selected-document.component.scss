@@ -168,15 +168,16 @@
                         width: 12px;
                     }
                 }
+                .no-fields-available {
+                    overflow: hidden;
+                    padding: 12px;
+                    background-color: #EBF0F5;
+                    display: grid;
+                    place-content: center;
+                    height: 100%;
+                }
             }
 
-            .no-fields-available {
-                overflow: auto;
-                padding: 12px;
-                background-color: #EBF0F5;
-                display: grid;
-                place-content: center;
-            }
 
             .update-button {
                 background-color: #EBF0F5;
