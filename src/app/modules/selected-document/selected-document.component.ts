@@ -108,13 +108,13 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
           updatedValue
         });
         this.content[key] = value;
-        this.updatedContent[key] = updatedValue;
+        this.updatedContent[key] = (updatedValue?.length) ? updatedValue : value;
       } else if (parsedData[key] && Object.keys(parsedData[key]).length) {
         const children = this.processData(parsedData[key]);
         const averageConfidence = children.reduce((sum, child) => sum + child.confidence, 0) / children.length;
         result.push({
           key,
-          confidence: Math.random(),
+          confidence:averageConfidence,
           value: "",
           children,
           updatedValue: "",
@@ -133,7 +133,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
       } else {
         result[item.key] = {
           value: item.value,
-          confidence: Math.random(),
+          confidence: item.confidence,
           page: item.page,
           updatedValue: this.updatedContent[item.key]
         };
@@ -190,11 +190,11 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
 
   confidenceChanged(node: ParsedData) {
     setTimeout(() => {
-      if (node.value != node.updatedValue) {
+      if (node.value != this.updatedContent[node.key]) {
         this.isFieldChanged[node.key] = true;
         this.showUpdateButton = true;
       }
-    }, 100);
+    }, 200);
   }
 
   resetContent(node: ParsedData) {
@@ -373,6 +373,7 @@ export class SelectedDocumentComponent implements OnInit, AfterViewInit {
   editField(node: ParsedData) {
     this.editSet.add(node.key);
     node.updatedValue = node.updatedValue || node.value;
+    this.updatedContent[node.key] = node.updatedValue;
   }
 
   async handlePageEvent(e: PageEvent) {
